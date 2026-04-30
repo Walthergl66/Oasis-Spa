@@ -13,7 +13,10 @@ export const envValidationSchema = Joi.object({
   DATABASE_NAME: Joi.string().required(),
 
   SUPABASE_URL: Joi.string().uri().required(),
+  SUPABASE_ANON_KEY: Joi.string().required(),
+  SUPABASE_SERVICE_ROLE_KEY: Joi.string().required(),
   SUPABASE_JWT_SECRET: Joi.string().required(),
 
   JWT_AUDIENCE: Joi.string().default('authenticated'),
+  FRONTEND_URL: Joi.string().uri().optional(),
 });

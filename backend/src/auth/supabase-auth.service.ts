@@ -1,10 +1,19 @@
 import {
+  ConflictException,
+  BadGatewayException,
   Injectable,
   UnauthorizedException,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { Repository } from 'typeorm';
+import { UserRole } from '../common/enums/database.enums';
+import { User } from '../users/entities/user.entity';
+import { DevRegisterDto } from './dto/dev-register.dto';
+import { SupabaseAdminUser } from './interfaces/supabase-admin-user.interface';
+import { SupabasePasswordLoginResponse } from './interfaces/supabase-login-response.interface';
 import {
   SupabaseAuthenticatedUser,
   SupabaseJwtPayload,
@@ -17,21 +26,32 @@ interface JwtHeader {
 
 @Injectable()
 export class SupabaseAuthService {
+  private readonly supabaseUrl: string;
   private readonly jwtSecret: string;
+  private readonly anonKey: string;
+  private readonly serviceRoleKey: string;
   private readonly expectedAudience: string;
   private readonly expectedIssuer: string;
 
-  constructor(private readonly configService: ConfigService) {
-    const supabaseUrl = this.configService
+  constructor(
+    private readonly configService: ConfigService,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {
+    this.supabaseUrl = this.configService
       .getOrThrow<string>('SUPABASE_URL')
       .replace(/\/$/, '');
 
     this.jwtSecret = this.configService.getOrThrow<string>(
       'SUPABASE_JWT_SECRET',
     );
+    this.anonKey = this.configService.getOrThrow<string>('SUPABASE_ANON_KEY');
+    this.serviceRoleKey = this.configService.getOrThrow<string>(
+      'SUPABASE_SERVICE_ROLE_KEY',
+    );
     this.expectedAudience =
       this.configService.get<string>('JWT_AUDIENCE') ?? 'authenticated';
-    this.expectedIssuer = `${supabaseUrl}/auth/v1`;
+    this.expectedIssuer = `${this.supabaseUrl}/auth/v1`;
   }
 
   verifyAccessToken(token: string): SupabaseAuthenticatedUser {
@@ -50,6 +70,74 @@ export class SupabaseAuthService {
       userMetadata: payload.user_metadata ?? {},
       payload,
     };
+  }
+
+  async signInWithPassword(credentials: {
+    email: string;
+    password: string;
+  }): Promise<SupabasePasswordLoginResponse> {
+    const payload = await this.performPasswordLogin(credentials);
+
+    if (!payload?.access_token) {
+      throw new BadGatewayException('Supabase did not return an access token');
+    }
+
+    await this.syncUserProfile(payload.user);
+
+    return payload;
+  }
+
+  async registerDevelopmentUser(
+    payload: DevRegisterDto,
+  ): Promise<SupabasePasswordLoginResponse> {
+    const response = await fetch(`${this.supabaseUrl}/auth/v1/admin/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: this.serviceRoleKey,
+        Authorization: `Bearer ${this.serviceRoleKey}`,
+      },
+      body: JSON.stringify({
+        email: payload.email,
+        password: payload.password,
+        phone: payload.phone,
+        email_confirm: true,
+        user_metadata: {
+          full_name: payload.fullName,
+          avatar_url: payload.avatarUrl,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorBody = (await response.json().catch(() => null)) as
+        | { msg?: string; message?: string; error?: string }
+        | null;
+      const message =
+        errorBody?.msg ??
+        errorBody?.message ??
+        errorBody?.error ??
+        'Supabase registration failed';
+
+      if (/already/i.test(message)) {
+        throw new ConflictException(message);
+      }
+
+      throw new BadGatewayException(message);
+    }
+
+    const createdUser = (await response.json()) as SupabaseAdminUser | null;
+
+    if (!createdUser?.id) {
+      throw new BadGatewayException('Supabase did not return the created user');
+    }
+
+    await this.syncUserProfile(createdUser, payload.fullName, payload.avatarUrl);
+
+    return this.signInWithPassword({
+      email: payload.email,
+      password: payload.password,
+    });
   }
 
   private decodeAndVerifyJwt(token: string): SupabaseJwtPayload {
@@ -125,5 +213,80 @@ export class SupabaseAuthService {
     }
 
     return audience === this.expectedAudience;
+  }
+
+  private async performPasswordLogin(credentials: {
+    email: string;
+    password: string;
+  }): Promise<SupabasePasswordLoginResponse | null> {
+    const response = await fetch(
+      `${this.supabaseUrl}/auth/v1/token?grant_type=password`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: this.anonKey,
+        },
+        body: JSON.stringify(credentials),
+      },
+    );
+
+    if (!response.ok) {
+      const errorBody = (await response.json().catch(() => null)) as
+        | { msg?: string; error_description?: string; error?: string }
+        | null;
+
+      throw new UnauthorizedException(
+        errorBody?.msg ??
+          errorBody?.error_description ??
+          errorBody?.error ??
+          'Supabase login failed',
+      );
+    }
+
+    return (await response.json()) as SupabasePasswordLoginResponse | null;
+  }
+
+  private async syncUserProfile(
+    authUser: SupabaseAdminUser,
+    fallbackFullName?: string,
+    fallbackAvatarUrl?: string,
+  ): Promise<User> {
+    const existingUser = await this.usersRepository.findOne({
+      where: { id: authUser.id },
+    });
+
+    const fullName = this.extractString(authUser.user_metadata?.full_name)
+      ?? fallbackFullName
+      ?? authUser.email?.split('@')[0]
+      ?? 'Oasis Spa User';
+    const avatarUrl =
+      this.extractString(authUser.user_metadata?.avatar_url) ?? fallbackAvatarUrl;
+
+    if (existingUser) {
+      existingUser.fullName = existingUser.fullName || fullName;
+      existingUser.avatarUrl = existingUser.avatarUrl ?? avatarUrl ?? null;
+      existingUser.phone = existingUser.phone ?? authUser.phone ?? null;
+      existingUser.isActive = true;
+
+      return this.usersRepository.save(existingUser);
+    }
+
+    const newUser = this.usersRepository.create({
+      id: authUser.id,
+      fullName,
+      phone: authUser.phone ?? null,
+      avatarUrl: avatarUrl ?? null,
+      role: UserRole.CUSTOMER,
+      isActive: true,
+    });
+
+    return this.usersRepository.save(newUser);
+  }
+
+  private extractString(value: unknown): string | undefined {
+    return typeof value === 'string' && value.trim().length > 0
+      ? value
+      : undefined;
   }
 }

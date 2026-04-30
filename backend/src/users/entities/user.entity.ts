@@ -3,7 +3,6 @@ import {
   CreateDateColumn,
   Entity,
   OneToMany,
-  OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -50,8 +49,8 @@ export class User {
   @OneToMany(() => Spa, (spa) => spa.owner)
   ownedSpas: Spa[];
 
-  @OneToOne(() => Employee, (employee) => employee.user)
-  employeeProfile: Employee;
+  @OneToMany(() => Employee, (employee) => employee.user)
+  employeeProfiles: Employee[];
 
   @OneToMany(() => Appointment, (appointment) => appointment.customer)
   customerAppointments: Appointment[];

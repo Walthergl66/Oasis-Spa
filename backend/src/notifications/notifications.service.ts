@@ -1,26 +1,66 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { BaseCrudService } from '../common/services/base-crud.service';
+import { Appointment } from '../appointments/entities/appointment.entity';
+import { User } from '../users/entities/user.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { Notification } from './entities/notification.entity';
 
 @Injectable()
-export class NotificationsService {
-  create(createNotificationDto: CreateNotificationDto) {
-    return 'This action adds a new notification';
+export class NotificationsService extends BaseCrudService<Notification> {
+  constructor(
+    @InjectRepository(Notification)
+    private readonly notificationsRepository: Repository<Notification>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+    @InjectRepository(Appointment)
+    private readonly appointmentsRepository: Repository<Appointment>,
+  ) {
+    super(notificationsRepository, 'Notification');
   }
 
-  findAll() {
-    return `This action returns all notifications`;
+  async create(createNotificationDto: CreateNotificationDto) {
+    await this.ensureExists(this.usersRepository, createNotificationDto.userId, 'User');
+
+    if (createNotificationDto.appointmentId) {
+      await this.ensureExists(
+        this.appointmentsRepository,
+        createNotificationDto.appointmentId,
+        'Appointment',
+      );
+    }
+
+    return super.create(createNotificationDto);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} notification`;
+  async findAll() {
+    return super.findAll({
+      relations: ['user', 'appointment'],
+      order: { createdAt: 'DESC' },
+    });
   }
 
-  update(id: number, updateNotificationDto: UpdateNotificationDto) {
-    return `This action updates a #${id} notification`;
+  async findOne(id: string) {
+    return this.findOneOrFail(id, {
+      relations: ['user', 'appointment'],
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} notification`;
+  async update(id: string, updateNotificationDto: UpdateNotificationDto) {
+    if (updateNotificationDto.userId) {
+      await this.ensureExists(this.usersRepository, updateNotificationDto.userId, 'User');
+    }
+
+    if (updateNotificationDto.appointmentId) {
+      await this.ensureExists(
+        this.appointmentsRepository,
+        updateNotificationDto.appointmentId,
+        'Appointment',
+      );
+    }
+
+    return super.update(id, updateNotificationDto);
   }
 }

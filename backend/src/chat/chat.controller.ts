@@ -6,11 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
 
+@ApiTags('Chat')
 @Controller('chat')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
@@ -26,17 +29,20 @@ export class ChatController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.chatService.findOne(+id);
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.chatService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateChatDto: UpdateChatDto) {
-    return this.chatService.update(+id, updateChatDto);
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateChatDto: UpdateChatDto,
+  ) {
+    return this.chatService.update(id, updateChatDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.chatService.remove(+id);
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.chatService.remove(id);
   }
 }

@@ -6,11 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { AvailabilityService } from './availability.service';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
 import { UpdateAvailabilityDto } from './dto/update-availability.dto';
 
+@ApiTags('Availability')
 @Controller('availability')
 export class AvailabilityController {
   constructor(private readonly availabilityService: AvailabilityService) {}
@@ -26,20 +29,20 @@ export class AvailabilityController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.availabilityService.findOne(+id);
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.availabilityService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateAvailabilityDto: UpdateAvailabilityDto,
   ) {
-    return this.availabilityService.update(+id, updateAvailabilityDto);
+    return this.availabilityService.update(id, updateAvailabilityDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.availabilityService.remove(+id);
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.availabilityService.remove(id);
   }
 }
