@@ -4,7 +4,8 @@ export const Footer: React.FC = () => {
   return (
     <footer className="footer">
       <div className="footer-content">
-        <p>&copy; 2024 Oasis Spa. All rights reserved.</p>
+        <p>Oasis Spa</p>
+        <p>Agenda, servicios y promociones desde una interfaz simple.</p>
       </div>
     </footer>
   );

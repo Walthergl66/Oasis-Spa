@@ -14,7 +14,7 @@ interface BookingStore {
   clearBooking: () => void;
 }
 
-export const useBookingStore = create<BookingStore>((set: any) => ({
+export const useBookingStore = create<BookingStore>((set) => ({
   booking: null,
   setBooking: (booking: BookingData) => set({ booking }),
   clearBooking: () => set({ booking: null }),

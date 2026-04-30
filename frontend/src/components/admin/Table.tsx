@@ -2,7 +2,7 @@ import React from 'react';
 
 interface TableProps {
   columns: string[];
-  data: any[];
+  data: Record<string, React.ReactNode>[];
 }
 
 export const Table: React.FC<TableProps> = ({ columns, data }) => {
