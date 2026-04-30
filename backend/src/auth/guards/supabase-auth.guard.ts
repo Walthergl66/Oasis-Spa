@@ -5,12 +5,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { SupabaseAuthenticatedUser } from '../interfaces/supabase-user.interface';
+import { AuthenticatedRequest } from '../interfaces/authenticated-request.interface';
 import { SupabaseAuthService } from '../supabase-auth.service';
-
-type AuthenticatedRequest = Request & {
-  user?: SupabaseAuthenticatedUser;
-};
 
 @Injectable()
 export class SupabaseAuthGuard implements CanActivate {
