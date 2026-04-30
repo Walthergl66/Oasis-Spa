@@ -1,26 +1,50 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { BaseCrudService } from '../common/services/base-crud.service';
 import { CreateSpaDto } from './dto/create-spa.dto';
 import { UpdateSpaDto } from './dto/update-spa.dto';
+import { Spa } from './entities/spa.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
-export class SpasService {
-  create(createSpaDto: CreateSpaDto) {
-    return 'This action adds a new spa';
+export class SpasService extends BaseCrudService<Spa> {
+  constructor(
+    @InjectRepository(Spa)
+    private readonly spasRepository: Repository<Spa>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {
+    super(spasRepository, 'Spa');
   }
 
-  findAll() {
-    return `This action returns all spas`;
+  async create(createSpaDto: CreateSpaDto) {
+    await this.ensureOwnerExists(createSpaDto.ownerId);
+    return super.create(createSpaDto);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} spa`;
+  async findAll() {
+    return super.findAll({
+      relations: ['owner', 'images', 'services', 'employees'],
+      order: { createdAt: 'DESC' },
+    });
   }
 
-  update(id: number, updateSpaDto: UpdateSpaDto) {
-    return `This action updates a #${id} spa`;
+  async findOne(id: string) {
+    return this.findOneOrFail(id, {
+      relations: ['owner', 'images', 'services', 'employees', 'reviews'],
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} spa`;
+  async update(id: string, updateSpaDto: UpdateSpaDto) {
+    if (updateSpaDto.ownerId) {
+      await this.ensureOwnerExists(updateSpaDto.ownerId);
+    }
+
+    return super.update(id, updateSpaDto);
+  }
+
+  private async ensureOwnerExists(ownerId: string): Promise<void> {
+    await this.ensureExists(this.usersRepository, ownerId, 'Owner');
   }
 }
