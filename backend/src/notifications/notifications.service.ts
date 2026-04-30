@@ -48,6 +48,14 @@ export class NotificationsService extends BaseCrudService<Notification> {
     });
   }
 
+  async findMine(profile: User) {
+    return super.findAll({
+      where: { userId: profile.id } as any,
+      relations: ['appointment'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async update(id: string, updateNotificationDto: UpdateNotificationDto) {
     if (updateNotificationDto.userId) {
       await this.ensureExists(this.usersRepository, updateNotificationDto.userId, 'User');

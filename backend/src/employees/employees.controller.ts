@@ -7,11 +7,17 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { UserRole } from '../common/enums/database.enums';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { EmployeeOwnershipGuard } from './guards/employee-ownership.guard';
 
 @ApiTags('Employees')
 @Controller('employees')
@@ -19,6 +25,9 @@ export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
   @Post()
+  @UseGuards(SupabaseAuthGuard, RolesGuard, EmployeeOwnershipGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
   create(@Body() createEmployeeDto: CreateEmployeeDto) {
     return this.employeesService.create(createEmployeeDto);
   }
@@ -34,6 +43,9 @@ export class EmployeesController {
   }
 
   @Patch(':id')
+  @UseGuards(SupabaseAuthGuard, RolesGuard, EmployeeOwnershipGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateEmployeeDto: UpdateEmployeeDto,
@@ -42,6 +54,9 @@ export class EmployeesController {
   }
 
   @Delete(':id')
+  @UseGuards(SupabaseAuthGuard, RolesGuard, EmployeeOwnershipGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.employeesService.remove(id);
   }

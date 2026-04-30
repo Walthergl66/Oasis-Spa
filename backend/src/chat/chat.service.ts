@@ -36,6 +36,14 @@ export class ChatService extends BaseCrudService<ChatSession> {
     });
   }
 
+  async findMine(profile: User) {
+    return super.findAll({
+      where: { userId: profile.id } as any,
+      relations: ['messages'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async update(id: string, updateChatDto: UpdateChatDto) {
     if (updateChatDto.userId) {
       await this.ensureExists(this.usersRepository, updateChatDto.userId, 'User');

@@ -29,7 +29,7 @@ export class SupabaseAuthService {
   private readonly supabaseUrl: string;
   private readonly jwtSecret: string;
   private readonly anonKey: string;
-  private readonly serviceRoleKey: string;
+  private readonly serviceRoleKey: string | null;
   private readonly expectedAudience: string;
   private readonly expectedIssuer: string;
 
@@ -46,9 +46,12 @@ export class SupabaseAuthService {
       'SUPABASE_JWT_SECRET',
     );
     this.anonKey = this.configService.getOrThrow<string>('SUPABASE_ANON_KEY');
-    this.serviceRoleKey = this.configService.getOrThrow<string>(
-      'SUPABASE_SERVICE_ROLE_KEY',
-    );
+    const enableDevAuth = this.configService.get<boolean>('ENABLE_DEV_AUTH');
+    const nodeEnv = this.configService.get<string>('NODE_ENV');
+    this.serviceRoleKey =
+      nodeEnv === 'development' && enableDevAuth
+        ? (this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY') ?? null)
+        : null;
     this.expectedAudience =
       this.configService.get<string>('JWT_AUDIENCE') ?? 'authenticated';
     this.expectedIssuer = `${this.supabaseUrl}/auth/v1`;
@@ -90,6 +93,11 @@ export class SupabaseAuthService {
   async registerDevelopmentUser(
     payload: DevRegisterDto,
   ): Promise<SupabasePasswordLoginResponse> {
+    if (!this.serviceRoleKey) {
+      throw new InternalServerErrorException(
+        'SUPABASE_SERVICE_ROLE_KEY is required for development registration when ENABLE_DEV_AUTH=true',
+      );
+    }
     const response = await fetch(`${this.supabaseUrl}/auth/v1/admin/users`, {
       method: 'POST',
       headers: {

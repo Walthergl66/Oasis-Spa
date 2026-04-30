@@ -14,6 +14,10 @@ import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
 import type { SupabaseAuthenticatedUser } from '../auth/interfaces/supabase-user.interface';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { UserRole } from '../common/enums/database.enums';
+import { SelfOrAdminGuard } from './guards/self-or-admin.guard';
 
 @ApiTags('Users')
 @Controller('users')
@@ -29,16 +33,25 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
   findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
+  @UseGuards(SupabaseAuthGuard, RolesGuard, SelfOrAdminGuard)
+  @Roles(UserRole.CUSTOMER)
+  @ApiBearerAuth()
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.findOne(id);
   }
 
   @Patch(':id')
+  @UseGuards(SupabaseAuthGuard, RolesGuard, SelfOrAdminGuard)
+  @Roles(UserRole.CUSTOMER)
+  @ApiBearerAuth()
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -47,6 +60,9 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.remove(id);
   }
