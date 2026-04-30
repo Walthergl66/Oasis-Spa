@@ -58,10 +58,11 @@ export class AuthController {
 
   private ensureDevelopmentOnly(): void {
     const nodeEnv = this.configService.get<string>('NODE_ENV');
+    const enableDevAuth = this.configService.get<boolean>('ENABLE_DEV_AUTH');
 
-    if (nodeEnv === 'production') {
+    if (nodeEnv !== 'development' || !enableDevAuth) {
       throw new ForbiddenException(
-        'This endpoint is only available outside production',
+        'This endpoint is only available when ENABLE_DEV_AUTH=true in development',
       );
     }
   }

@@ -18,5 +18,6 @@ export const envValidationSchema = Joi.object({
   SUPABASE_JWT_SECRET: Joi.string().required(),
 
   JWT_AUDIENCE: Joi.string().default('authenticated'),
+  ENABLE_DEV_AUTH: Joi.boolean().default(false),
   FRONTEND_URL: Joi.string().uri().optional(),
 });
