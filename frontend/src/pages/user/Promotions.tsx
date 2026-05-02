@@ -1,12 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { promotions } from '../../data/mockData';
 
 export const Promotions: React.FC = () => {
-  const promotions = [
-    { title: 'Duo relajante', description: 'Dos masajes de 60 minutos con 15% de descuento.' },
-    { title: 'Facial de temporada', description: 'Limpieza facial con hidratacion incluida.' },
-    { title: 'Ritual completo', description: 'Paquete corporal premium para fines de semana.' },
-  ];
-
   return (
     <div className="promotions-page">
       <span className="eyebrow">Promociones</span>
@@ -17,10 +13,11 @@ export const Promotions: React.FC = () => {
             <span className="badge warning">Disponible</span>
             <h3>{promo.title}</h3>
             <p className="muted">{promo.description}</p>
+            <p className="price">{promo.discount}</p>
             <div className="row-actions">
-              <button className="btn btn-primary" type="button">
+              <Link className="btn btn-primary" to="/booking">
                 Usar promocion
-              </button>
+              </Link>
             </div>
           </article>
         ))}

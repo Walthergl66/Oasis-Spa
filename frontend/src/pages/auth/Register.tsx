@@ -17,7 +17,7 @@ export const Register: React.FC = () => {
             <input id="email" type="email" placeholder="tu@correo.com" />
           </div>
           <div className="field full">
-            <label htmlFor="password">Contrasena</label>
+            <label htmlFor="password">Contraseña</label>
             <input id="password" type="password" placeholder="********" />
           </div>
         </div>
