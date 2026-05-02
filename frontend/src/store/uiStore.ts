@@ -7,7 +7,7 @@ interface UIStore {
   setTheme: (theme: 'light' | 'dark') => void;
 }
 
-export const useUIStore = create<UIStore>((set: any) => ({
+export const useUIStore = create<UIStore>((set) => ({
   sidebarOpen: true,
   theme: 'light',
   toggleSidebar: () => set((state: UIStore) => ({ sidebarOpen: !state.sidebarOpen })),
