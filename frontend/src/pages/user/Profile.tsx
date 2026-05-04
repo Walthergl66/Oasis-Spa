@@ -1,6 +1,19 @@
 import React from 'react';
+import { useAuthStore } from '../../store/authStore';
 
 export const Profile: React.FC = () => {
+  const { user, setUser } = useAuthStore();
+
+  const toggleVip = () => {
+    setUser({
+      id: user?.id || 'client-001',
+      name: user?.name || 'Cliente Oasis',
+      email: user?.email || 'cliente@oasis.com',
+      role: user?.role || 'user',
+      vip: !user?.vip,
+    });
+  };
+
   return (
     <div className="profile-page">
       <span className="eyebrow">Perfil</span>
@@ -10,14 +23,14 @@ export const Profile: React.FC = () => {
           <div className="form-grid">
             <div className="field">
               <label htmlFor="profile-name">Nombre</label>
-              <input id="profile-name" defaultValue="Cliente Oasis" />
+              <input id="profile-name" defaultValue={user?.name || 'Cliente Oasis'} />
             </div>
             <div className="field">
               <label htmlFor="profile-email">Correo</label>
-              <input id="profile-email" type="email" defaultValue="cliente@oasis.com" />
+              <input id="profile-email" type="email" defaultValue={user?.email || 'cliente@oasis.com'} />
             </div>
             <div className="field">
-              <label htmlFor="profile-phone">Telefono</label>
+              <label htmlFor="profile-phone">Teléfono</label>
               <input id="profile-phone" defaultValue="300 000 0000" />
             </div>
             <div className="field">
@@ -50,7 +63,14 @@ export const Profile: React.FC = () => {
               <span>Puntos</span>
               <strong>120</strong>
             </li>
+            <li>
+              <span>Estado VIP</span>
+              <strong>{user?.vip ? 'Activo' : 'Inactivo'}</strong>
+            </li>
           </ul>
+          <button className="btn btn-primary full-width" type="button" onClick={toggleVip}>
+            {user?.vip ? 'Desactivar simulacion VIP' : 'Simular compra VIP'}
+          </button>
         </aside>
       </div>
     </div>

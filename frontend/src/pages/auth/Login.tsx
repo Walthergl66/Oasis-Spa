@@ -6,14 +6,14 @@ export const Login: React.FC = () => {
     <div className="auth-page">
       <form className="auth-card">
         <span className="eyebrow">Acceso</span>
-        <h1>Iniciar sesion</h1>
+        <h1>Iniciar sesión</h1>
         <div className="form-grid">
           <div className="field full">
             <label htmlFor="email">Correo</label>
             <input id="email" type="email" placeholder="tu@correo.com" />
           </div>
           <div className="field full">
-            <label htmlFor="password">Contrasena</label>
+            <label htmlFor="password">Contraseña</label>
             <input id="password" type="password" placeholder="********" />
           </div>
         </div>

@@ -1,31 +1,33 @@
 import React from 'react';
+import { formatCurrency, services } from '../../data/mockData';
 
 export const AdminServices: React.FC = () => {
-  const services = [
-    ['Masaje relajante', '60 min', '$45.000', 'Activo'],
-    ['Limpieza facial', '45 min', '$38.000', 'Activo'],
-    ['Ritual corporal', '90 min', '$72.000', 'Activo'],
-  ];
-
   return (
     <div className="admin-services">
       <div className="admin-header">
         <div>
-          <span className="eyebrow">Catalogo</span>
+          <span className="eyebrow">Catálogo</span>
           <h1>Servicios</h1>
+          <p className="lead">Portafolio disponible para clientes regulares y experiencias VIP.</p>
         </div>
-        <button className="btn btn-primary" type="button">Nuevo servicio</button>
+        <button className="btn btn-primary" type="button">
+          Nuevo servicio
+        </button>
       </div>
       <div className="grid">
-        {services.map(([name, time, price, status]) => (
-          <article className="card" key={name}>
-            <span className="badge success">{status}</span>
-            <h3>{name}</h3>
-            <p className="muted">{time}</p>
-            <p className="price">{price}</p>
+        {services.map((service) => (
+          <article className="card" key={service.id}>
+            <span className={`badge ${service.vipOnly ? 'vip' : 'success'}`}>{service.vipOnly ? 'VIP' : 'Activo'}</span>
+            <h3>{service.name}</h3>
+            <p className="muted">{service.duration}</p>
+            <p className="price">{formatCurrency(service.price)}</p>
             <div className="row-actions">
-              <button className="btn btn-secondary" type="button">Editar</button>
-              <button className="btn btn-outline" type="button">Pausar</button>
+              <button className="btn btn-secondary" type="button">
+                Editar
+              </button>
+              <button className="btn btn-outline" type="button">
+                Pausar
+              </button>
             </div>
           </article>
         ))}

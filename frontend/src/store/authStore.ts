@@ -5,6 +5,7 @@ interface AuthUser {
   email: string;
   role: 'user' | 'admin';
   name: string;
+  vip?: boolean;
 }
 
 interface AuthStore {

@@ -1,17 +1,13 @@
 import React from 'react';
+import { appointments } from '../../data/mockData';
 
 export const Appointments: React.FC = () => {
-  const appointments = [
-    { service: 'Masaje relajante', date: '12 Mayo', time: '10:00', status: 'Confirmada' },
-    { service: 'Limpieza facial', date: '18 Mayo', time: '16:30', status: 'Pendiente' },
-  ];
-
   return (
     <div className="appointments-page">
       <span className="eyebrow">Mis citas</span>
-      <h1>Proximas reservas</h1>
+      <h1>Próximas reservas</h1>
       <div className="grid two section">
-        {appointments.map((appointment) => (
+        {appointments.slice(0, 2).map((appointment) => (
           <article className="card" key={`${appointment.service}-${appointment.date}`}>
             <span className={`badge ${appointment.status === 'Confirmada' ? 'success' : 'warning'}`}>
               {appointment.status}

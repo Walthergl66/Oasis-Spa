@@ -5,7 +5,7 @@ export const Footer: React.FC = () => {
     <footer className="footer">
       <div className="footer-content">
         <p>Oasis Spa</p>
-        <p>Agenda, servicios y promociones desde una interfaz simple.</p>
+        <p>Rituales, reservas y experiencias VIP desde un frontend moderno.</p>
       </div>
     </footer>
   );

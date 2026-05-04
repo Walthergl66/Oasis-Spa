@@ -1,64 +1,90 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { api } from '../../services/api';
+import { employees, formatCurrency, promotions, services, timeSlots } from '../../data/mockData';
+import { useAuthStore } from '../../store/authStore';
 
 export const Booking: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
+  const [serviceId, setServiceId] = useState(user?.vip ? services[0].id : services.find((service) => !service.vipOnly)?.id || '');
+  const [date, setDate] = useState('2026-05-04');
+  const [time, setTime] = useState(timeSlots[1]);
+  const [employee, setEmployee] = useState(employees[0]);
+  const [message, setMessage] = useState('');
+  const selectedService = useMemo(() => services.find((service) => service.id === serviceId), [serviceId]);
+  const visibleServices = services.filter((service) => !service.vipOnly || user?.vip);
+
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const fallback = {
+      id: `local-${Date.now()}`,
+      serviceId,
+      service: selectedService?.name,
+      date,
+      time,
+      employee,
+      status: 'Pendiente',
+    };
+
+    await api.createBooking({ serviceId, date, time, employee }, fallback);
+    setMessage('Cita guardada en frontend. Se enviara al endpoint real cuando exista.');
+  };
+
   return (
     <div className="booking-page">
       <span className="eyebrow">Reservas</span>
-      <h1>Crear solicitud de cita</h1>
-      <p className="lead">
-        Formulario visual listo para conectar cuando el backend tenga endpoints de reservas.
-      </p>
+      <h1>Agendar cita</h1>
+      <p className="lead">Elige servicio, fecha y hora en una experiencia sencilla, clara y elegante.</p>
 
       <div className="booking-layout section">
-        <form className="card">
+        <form className="card" onSubmit={submit}>
           <div className="form-grid">
             <div className="field">
               <label htmlFor="name">Nombre</label>
-              <input id="name" placeholder="Tu nombre" />
+              <input id="name" defaultValue={user?.name || 'Cliente Oasis'} />
             </div>
             <div className="field">
-              <label htmlFor="phone">Telefono</label>
+              <label htmlFor="phone">Teléfono</label>
               <input id="phone" placeholder="300 000 0000" />
             </div>
             <div className="field">
               <label htmlFor="service">Servicio</label>
-              <select id="service" defaultValue="">
-                <option value="" disabled>
-                  Selecciona un servicio
-                </option>
-                <option>Masaje relajante</option>
-                <option>Limpieza facial</option>
-                <option>Ritual corporal</option>
+              <select id="service" value={serviceId} onChange={(event) => setServiceId(event.target.value)}>
+                {visibleServices.map((service) => (
+                  <option key={service.id} value={service.id}>
+                    {service.name}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="field">
               <label htmlFor="date">Fecha</label>
-              <input id="date" type="date" />
+              <input id="date" type="date" value={date} onChange={(event) => setDate(event.target.value)} />
             </div>
             <div className="field">
               <label htmlFor="time">Hora</label>
-              <select id="time" defaultValue="">
-                <option value="" disabled>
-                  Elige hora
-                </option>
-                <option>09:00</option>
-                <option>11:30</option>
-                <option>15:00</option>
-                <option>17:30</option>
+              <select id="time" value={time} onChange={(event) => setTime(event.target.value)}>
+                {timeSlots.map((slot) => (
+                  <option key={slot}>{slot}</option>
+                ))}
               </select>
             </div>
             <div className="field">
-              <label htmlFor="people">Personas</label>
-              <input id="people" type="number" min="1" defaultValue="1" />
+              <label htmlFor="employee">Profesional</label>
+              <select id="employee" value={employee} onChange={(event) => setEmployee(event.target.value)}>
+                {employees.map((member) => (
+                  <option key={member}>{member}</option>
+                ))}
+              </select>
             </div>
             <div className="field full">
               <label htmlFor="notes">Notas</label>
               <textarea id="notes" placeholder="Preferencias, alergias o comentarios" />
             </div>
           </div>
+          {message && <p className="success-message">{message}</p>}
           <div className="form-actions">
-            <button className="btn btn-primary" type="button">
-              Guardar borrador
+            <button className="btn btn-primary" type="submit">
+              Confirmar solicitud
             </button>
             <button className="btn btn-outline" type="reset">
               Limpiar
@@ -67,22 +93,24 @@ export const Booking: React.FC = () => {
         </form>
 
         <aside className="panel card">
-          <span className="eyebrow">Resumen</span>
-          <h2>Flujo preparado</h2>
+          <span className="eyebrow">{user?.vip ? 'Cliente VIP' : 'Resumen'}</span>
+          <h2>{selectedService?.name}</h2>
+          <p className="muted">{selectedService?.description}</p>
           <ul className="summary-list">
             <li>
-              <span>Endpoint actual</span>
-              <strong>GET /</strong>
+              <span>Duración</span>
+              <strong>{selectedService?.duration}</strong>
             </li>
             <li>
-              <span>Reservas</span>
-              <strong>Pendiente API</strong>
+              <span>Valor</span>
+              <strong>{selectedService ? formatCurrency(selectedService.price) : '-'}</strong>
             </li>
             <li>
-              <span>Estado</span>
-              <strong>Interfaz lista</strong>
+              <span>Promo sugerida</span>
+              <strong>{promotions[0].discount}</strong>
             </li>
           </ul>
+          {!user?.vip && <p className="modal-note">Los servicios VIP aparecen al simular la compra VIP desde el inicio.</p>}
         </aside>
       </div>
     </div>
