@@ -10,10 +10,13 @@ export const UserLayout: React.FC<UserLayoutProps> = ({ children }) => {
   return (
     <div className="user-layout">
       <Navbar />
-      <main className="user-main">
-        {children}
-      </main>
-      <Footer />
+      {/* .page-shell recibe el blur/scale al abrir el login — el navbar queda fuera */}
+      <div className="page-shell">
+        <main className="user-main">
+          {children}
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 };

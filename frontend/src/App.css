@@ -869,3 +869,317 @@ textarea {
     overflow-x: auto;
   }
 }
+
+/* ════════════════════════════════════════
+   AUTH SPLIT PANEL — Transición split-screen
+   ════════════════════════════════════════ */
+
+/* Efecto de fondo cuando el panel está abierto.
+   Se aplica al .page-shell (wrapper que no incluye el navbar) */
+body.split-login-open .page-shell {
+  transform: translateX(-2.5%) scale(0.97);
+  filter: blur(3px) brightness(0.78);
+  pointer-events: none;
+}
+
+.page-shell {
+  transition:
+    transform 0.75s cubic-bezier(0.4, 0, 0.2, 1),
+    filter 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left center;
+}
+
+/* ── Overlay completo ── */
+.split-panel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.split-panel-overlay--visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ── Lado izquierdo: fondo visual (60%) ── */
+.split-panel-left {
+  position: relative;
+  flex: 0 0 58%;
+  overflow: hidden;
+  cursor: pointer;
+  background:
+    url("https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1400&q=80")
+    center / cover no-repeat;
+}
+
+.split-panel-left-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(38, 25, 18, 0.72) 0%,
+    rgba(74, 53, 40, 0.5) 60%,
+    rgba(201, 166, 107, 0.18) 100%
+  );
+}
+
+.split-panel-left-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 14px;
+  height: 100%;
+  padding: 0 64px 72px;
+  color: #fff9f3;
+}
+
+.split-headline {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3rem, 5.5vw, 5rem);
+  font-weight: 300;
+  line-height: 1.0;
+  letter-spacing: 0.01em;
+  margin: 0;
+  color: #fff9f3;
+}
+
+.split-headline em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.split-subline {
+  font-family: 'Inter', 'Trebuchet MS', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 249, 243, 0.7);
+  margin: 0;
+}
+
+.split-close-hint {
+  font-family: 'Inter', 'Trebuchet MS', sans-serif;
+  font-size: 0.75rem;
+  color: rgba(255, 249, 243, 0.45);
+  letter-spacing: 0.08em;
+  margin-top: 28px;
+  margin-bottom: 0;
+}
+
+/* ── Lado derecho: formulario (42%) ── */
+.split-panel-right {
+  position: relative;
+  flex: 0 0 42%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mist);
+  transform: translateX(100%);
+  transition: transform 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+}
+
+.split-panel-overlay--visible .split-panel-right {
+  transform: translateX(0);
+}
+
+/* Botón cerrar */
+.split-close-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(107, 79, 58, 0.18);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--coffee-deep);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
+  z-index: 2;
+}
+
+.split-close-btn:hover {
+  background: rgba(107, 79, 58, 0.07);
+  border-color: rgba(107, 79, 58, 0.32);
+  transform: rotate(90deg);
+}
+
+/* Contenedor del formulario */
+.split-form-wrapper {
+  width: min(380px, calc(100% - 64px));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 48px 0;
+}
+
+/* Eyebrow reutilizado */
+.split-eyebrow {
+  font-family: 'Inter', 'Trebuchet MS', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0;
+}
+
+/* Título del formulario */
+.split-form-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--coffee-deep);
+  margin: 0;
+}
+
+/* Control segmentado */
+.split-segmented {
+  display: inline-flex;
+  gap: 0;
+  border: 1px solid rgba(107, 79, 58, 0.15);
+  border-radius: 999px;
+  padding: 4px;
+  background: rgba(107, 79, 58, 0.04);
+  align-self: flex-start;
+}
+
+.split-seg-btn {
+  min-height: 34px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--stone);
+  font-family: 'Inter', 'Trebuchet MS', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.split-seg-btn--active {
+  background: var(--coffee);
+  color: #fff9f3;
+}
+
+/* Formulario */
+.split-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Campos del formulario — estilo underline */
+.split-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.split-field label {
+  font-family: 'Inter', 'Trebuchet MS', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--stone);
+}
+
+.split-field input,
+.split-field select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid rgba(107, 79, 58, 0.22);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: 'Inter', 'Trebuchet MS', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 220ms ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.split-field input:focus,
+.split-field select:focus {
+  border-bottom-color: var(--gold);
+}
+
+.split-field input::placeholder {
+  color: rgba(143, 125, 109, 0.45);
+}
+
+/* Botón submit */
+.split-submit-btn {
+  min-height: 50px;
+  padding: 0 28px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--coffee), var(--coffee-deep));
+  color: #fff9f3;
+  font-family: 'Inter', 'Trebuchet MS', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: transform 220ms ease, box-shadow 220ms ease;
+  box-shadow: 0 8px 24px rgba(74, 53, 40, 0.18);
+}
+
+.split-submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(74, 53, 40, 0.26);
+}
+
+/* Nota inferior */
+.split-note {
+  font-family: 'Inter', 'Trebuchet MS', sans-serif;
+  font-size: 0.72rem;
+  color: rgba(143, 125, 109, 0.55);
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+/* ── Responsive: móvil ── */
+@media (max-width: 700px) {
+  .split-panel-left {
+    display: none;
+  }
+
+  .split-panel-right {
+    flex: 1;
+    transform: translateY(60px);
+    opacity: 0;
+    transition:
+      transform 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.65s ease;
+  }
+
+  .split-panel-overlay--visible .split-panel-right {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  body.split-login-open .page-shell {
+    transform: scale(0.96);
+    filter: blur(2px) brightness(0.8);
+  }
+}

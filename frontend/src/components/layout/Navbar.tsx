@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { AuthModal } from '../auth/AuthModal';
+import { AuthSplitPanel } from '../auth/AuthSplitPanel';
 import { useAuthStore } from '../../store/authStore';
 import oasisLogo from '../../assets/icons/OasisHeaderSource-transparent.png';
 
@@ -61,7 +61,7 @@ export const Navbar: React.FC = () => {
           </NavLink>
         </div>
       </div>
-      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
+      <AuthSplitPanel open={authOpen} onClose={() => setAuthOpen(false)} />
     </nav>
   );
 };
