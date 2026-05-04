@@ -1,0 +1,55 @@
+/* Estilos principales del proyecto */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Colores Paleta Premium Spa */
+    --primary-color: #9A7E46;        /* Dorado/Bronce - Color Primario */
+    --secondary-color: #DBCBBD;      /* Nude/Arena - Acento Suave */
+    --accent-color: #9A7E46;         /* Dorado/Bronce - Para hover y énfasis */
+    --text-dark: #3E362E;            /* Marrón Oscuro Cálido */
+    --text-light: #8B7D73;           /* Gris cálido para textos secundarios */
+    --bg-light: #F5F2EB;             /* Crema/Beige - Fondo Principal */
+    --bg-white: #FFFFFF;             /* Blanco puro para tarjetas */
+    --bg-admin: #1A1A1A;             /* Gris Asfalto - Panel Admin */
+    
+    /* Tipografía */
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-size-base: 16px;
+    --font-size-small: 14px;
+    --font-size-large: 20px;
+    
+    /* Espaciado */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    color: var(--text-dark);
+    background-color: var(--bg-light);
+    line-height: 1.6;
+    letter-spacing: 0.3px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-md);
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--accent-color);
+}
