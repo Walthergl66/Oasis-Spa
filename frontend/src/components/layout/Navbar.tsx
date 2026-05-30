@@ -48,17 +48,28 @@ export const Navbar: React.FC = () => {
           {isAuthenticated && user?.vip && <span className="vip-chip">VIP</span>}
           {isAuthenticated && <span className="nav-user">{user?.name}</span>}
           {isAuthenticated ? (
-            <button className="btn btn-outline" type="button" onClick={logout}>
+            <button className="nav-text-link" type="button" onClick={logout}>
               Salir
             </button>
           ) : (
-            <button className="btn btn-outline" type="button" onClick={() => setAuthOpen(true)}>
-              Login / Registro
-            </button>
+            <div className="nav-auth-links">
+              <button 
+                className="nav-text-link" 
+                type="button" 
+                onClick={() => setAuthOpen(true)}
+              >
+                Ingresar
+              </button>
+              <span className="nav-separator"></span>
+              <button 
+                className="nav-text-link" 
+                type="button" 
+                onClick={() => setAuthOpen(true)}
+              >
+                Registrarse
+              </button>
+            </div>
           )}
-          <NavLink to="/admin/dashboard" className="btn btn-secondary">
-            Admin
-          </NavLink>
         </div>
       </div>
       <AuthSplitPanel open={authOpen} onClose={() => setAuthOpen(false)} />
