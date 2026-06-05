@@ -1,28 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../../services/api';
 import { ExperiencesSection } from '../../components/home/ExperiencesSection';
 import { promotions } from '../../data/mockData';
 import { useAuthStore } from '../../store/authStore';
 
 export const Home: React.FC = () => {
-  const [apiStatus, setApiStatus] = useState<'checking' | 'online' | 'offline'>('checking');
-  const [apiMessage, setApiMessage] = useState('Consultando backend existente...');
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
-
-  useEffect(() => {
-    api
-      .health()
-      .then((message) => {
-        setApiStatus(message.includes('simulados') ? 'offline' : 'online');
-        setApiMessage(message || 'Backend conectado');
-      })
-      .catch(() => {
-        setApiStatus('offline');
-        setApiMessage('Sin endpoints de negocio disponibles; frontend operando con mocks.');
-      });
-  }, []);
 
   const becomeVip = () => {
     setUser({
@@ -58,26 +42,6 @@ export const Home: React.FC = () => {
       </section>
 
       <div className="home-content">
-        <section className="section intro-band">
-          <div>
-            <span className="eyebrow">Experiencia boho minimalista</span>
-            <h2>Agenda, promociones y bienestar VIP en un solo lugar</h2>
-            <p className="lead">
-              La interfaz consume API cuando existe y simula en frontend lo que el backend aun no expone,
-              manteniendo intacta la capa Nest existente.
-            </p>
-          </div>
-          <div className="status-card">
-            <div>
-              <strong>Estado del backend</strong>
-              <p className="muted">{apiMessage}</p>
-            </div>
-            <span className={`status-pill ${apiStatus === 'online' ? 'online' : 'offline'}`}>
-              {apiStatus === 'checking' ? 'Revisando' : apiStatus === 'online' ? 'Conectado' : 'Mock activo'}
-            </span>
-          </div>
-        </section>
-
         <ExperiencesSection />
         <section className="section promo-band">
           <div>
