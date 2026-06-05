@@ -16,6 +16,13 @@
     --bg-white: #FFFFFF;             /* Blanco puro para tarjetas */
     --bg-admin: #1A1A1A;             /* Gris Asfalto - Panel Admin */
     
+    /* Colores Boho-Minimalista */
+    --boho-cream: #FFFDF9;
+    --boho-beige: #F5F2EB;
+    --boho-terracotta: #D4A373;
+    --boho-terracotta-pale: #E9D5C3;
+    --boho-shadow: rgba(62, 54, 46, 0.08);
+    
     /* Tipografía */
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     --font-size-base: 16px;
