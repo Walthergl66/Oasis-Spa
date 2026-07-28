@@ -1,24 +1,55 @@
 import React from 'react';
+import type { Appointment, Service } from '../../types';
+import { formatLongDate, toTime } from '../../utils/date';
+import { AppointmentBadge } from '../ui/Badge';
 
 interface AppointmentCardProps {
-  id: string;
-  serviceName: string;
-  date: string;
-  time: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  appointment: Appointment;
+  service?: Service;
+  onReschedule?: (appointment: Appointment) => void;
+  onCancel?: (appointment: Appointment) => void;
+  onRebook?: (appointment: Appointment) => void;
+  onReview?: (appointment: Appointment) => void;
 }
 
 export const AppointmentCard: React.FC<AppointmentCardProps> = ({
-  serviceName,
-  date,
-  time,
-  status
+  appointment, service, onReschedule, onCancel, onRebook, onReview,
 }) => {
+  const isActive = appointment.status === 'pendiente' || appointment.status === 'confirmada';
+  const isPast = new Date(appointment.start).getTime() < Date.now();
+
   return (
-    <div className={`appointment-card appointment-${status}`}>
-      <h4>{serviceName}</h4>
-      <p>{date} at {time}</p>
-      <span className="status">{status}</span>
+    <div className="reserva-item">
+      <div className="reserva-thumb">
+        {service && <img src={service.image} alt={appointment.serviceName} loading="lazy" />}
+      </div>
+      <div className="reserva-info">
+        <div className="reserva-name">{appointment.serviceName}</div>
+        <div className="reserva-meta">📅 {formatLongDate(appointment.start)}</div>
+        <div className="reserva-meta">🕐 {toTime(appointment.start)} · {appointment.durationMin} min</div>
+        <div className="reserva-meta">👤 Esp. {appointment.specialistName}</div>
+        {appointment.notes && <div className="reserva-meta">📝 {appointment.notes}</div>}
+
+        <div className="reserva-actions">
+          <AppointmentBadge status={appointment.status} />
+
+          {isActive && !isPast && onReschedule && (
+            <button className="btn-mini-outline" onClick={() => onReschedule(appointment)}>Reprogramar</button>
+          )}
+          {isActive && !isPast && onCancel && (
+            <button className="btn-mini-ghost" onClick={() => onCancel(appointment)}>Cancelar</button>
+          )}
+          {appointment.status === 'completada' && onRebook && (
+            <button className="btn-mini-outline" onClick={() => onRebook(appointment)}>Reservar de nuevo</button>
+          )}
+          {appointment.status === 'completada' && !appointment.reviewed && onReview && (
+            <button className="btn-mini-ghost" onClick={() => onReview(appointment)}>⭐ Dejar reseña</button>
+          )}
+          {appointment.status === 'cancelada' && onRebook && (
+            <button className="btn-mini-outline" onClick={() => onRebook(appointment)}>Reservar de nuevo</button>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

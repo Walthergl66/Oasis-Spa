@@ -1,30 +1,26 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+/**
+ * Fachada de reservas: conserva la API original (createBooking, getUserBookings,
+ * cancelBooking…) delegando en `appointmentsService`, que es donde vive la
+ * lógica. Se mantiene para no romper el código que ya la importaba.
+ */
+import type { Appointment, Availability, CreateAppointmentInput } from '../types';
+import { appointmentsService } from './appointments.service';
 
 export const bookingService = {
-  createBooking: async (bookingData: any) => {
-    const response = await axios.post(`${API_URL}/bookings`, bookingData);
-    return response.data;
-  },
+  createBooking: (data: CreateAppointmentInput): Promise<Appointment> => appointmentsService.create(data),
 
-  getUserBookings: async (userId: string) => {
-    const response = await axios.get(`${API_URL}/bookings/user/${userId}`);
-    return response.data;
-  },
+  getUserBookings: (userId: string): Promise<Appointment[]> => appointmentsService.getUpcoming(userId),
 
-  getBookingById: async (bookingId: string) => {
-    const response = await axios.get(`${API_URL}/bookings/${bookingId}`);
-    return response.data;
-  },
+  getUserHistory: (userId: string): Promise<Appointment[]> => appointmentsService.getHistory(userId),
 
-  updateBooking: async (bookingId: string, data: any) => {
-    const response = await axios.put(`${API_URL}/bookings/${bookingId}`, data);
-    return response.data;
-  },
+  getBookingById: (bookingId: string): Promise<Appointment> => appointmentsService.getById(bookingId),
 
-  cancelBooking: async (bookingId: string) => {
-    const response = await axios.delete(`${API_URL}/bookings/${bookingId}`);
-    return response.data;
-  },
+  getAvailability: (serviceId: string, date: string): Promise<Availability> =>
+    appointmentsService.getAvailability(serviceId, date),
+
+  rescheduleBooking: (bookingId: string, date: string, time: string, specialistId?: string): Promise<Appointment> =>
+    appointmentsService.reschedule(bookingId, date, time, specialistId),
+
+  cancelBooking: (bookingId: string, reason?: string): Promise<Appointment> =>
+    appointmentsService.cancel(bookingId, reason),
 };
