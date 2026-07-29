@@ -7,7 +7,7 @@ import {
   ManyToMany,
   OneToMany,
   OneToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Appointment } from '../../appointments/entities/appointment.entity';
@@ -29,10 +29,17 @@ export enum LoyaltyLevel {
 }
 
 /**
- * Persona con cuenta en el sistema: clienta, especialista o administración.
+ * Perfil de una persona del sistema: clienta, especialista o administración.
  *
- * Un solo `users` con rol, en lugar de tablas separadas, porque comparten
- * identidad y autenticación. Los datos propios del trabajo (especialidades,
+ * La IDENTIDAD (credenciales, sesiones, recuperación de contraseña) no vive
+ * aquí: la gestiona Supabase Auth en `auth.users`. Esta tabla es el perfil de
+ * dominio y su `id` es el mismo identificador que emite Supabase, de modo que
+ * hay exactamente un perfil por cuenta y la relación no puede desincronizarse.
+ * Por eso el id NO se autogenera: lo asigna el backend con el `sub` del usuario
+ * recién creado en Supabase.
+ *
+ * Un solo `users` con rol, en lugar de tablas separadas, porque los tres tipos
+ * comparten identidad. Los datos propios del trabajo (especialidades,
  * valoración, estado) viven en `specialists`, enlazada uno a uno.
  *
  * `points` y `level` se almacenan en lugar de recalcularse en cada consulta:
@@ -41,24 +48,21 @@ export enum LoyaltyLevel {
  */
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn('uuid')
+  /** Igual a `auth.users.id`. Lo asigna Supabase Auth, no la base. */
+  @PrimaryColumn({ type: 'uuid' })
   id: string;
 
   @Column({ type: 'varchar', length: 120 })
   name: string;
 
+  /**
+   * Copia del correo con el que se autentica. Supabase lo guarda en
+   * `auth.users`; aquí se replica para poder listar y buscar clientas sin
+   * consultar el schema de autenticación en cada pantalla del panel.
+   */
   @Index({ unique: true })
   @Column({ type: 'varchar', length: 160 })
   email: string;
-
-  /** Hash bcrypt. La contraseña en claro nunca se persiste. */
-  @Column({
-    name: 'password_hash',
-    type: 'varchar',
-    length: 255,
-    select: false,
-  })
-  passwordHash: string;
 
   @Column({ type: 'varchar', length: 30, default: '' })
   phone: string;

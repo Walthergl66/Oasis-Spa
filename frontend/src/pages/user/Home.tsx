@@ -27,7 +27,7 @@ export const Home: React.FC = () => {
   const popular = services.filter(service => service.popular);
 
   const greeting = (() => {
-    if (!user) return 'Bienvenida a Spa & Belleza.';
+    if (!user) return 'Bienvenida a Oasis Spa.';
     if (!next) return 'No tienes citas próximas. ¿Nos vemos pronto?';
     const days = daysFromToday(next.start);
     if (days === 0) return `Tu cita de ${next.serviceName} es hoy a las ${toTime(next.start)}.`;

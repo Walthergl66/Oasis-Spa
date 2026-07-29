@@ -16,7 +16,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="header">
-      <Link to="/" className="logo">Spa<span>&amp; BELLEZA</span></Link>
+      <Link to="/" className="logo">Oasis<span>SPA</span></Link>
 
       <nav className="nav">
         {LINKS.map(link => (

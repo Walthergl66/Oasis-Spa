@@ -46,7 +46,7 @@ export const Booking: React.FC = () => {
           <div className="location-name">{service.name}</div>
           <div className="location-addr">{service.description}</div>
           <div className="side-block-label">UBICACIÓN</div>
-          <div className="location-addr">📍 Spa &amp; Belleza · Manta, Manabí</div>
+          <div className="location-addr">📍 Oasis Spa · Manta, Manabí</div>
           <div className="side-block-label">HORARIO</div>
           <div className="location-addr">Lun a Sáb · 09:00 – 18:00</div>
           <div className="location-addr">Dom · 10:00 – 14:00</div>

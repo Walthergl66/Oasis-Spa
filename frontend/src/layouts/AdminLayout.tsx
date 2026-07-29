@@ -30,7 +30,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <div className="admin-topbar">
           <h1>{TITLES[pathname] ?? 'Administración'}</h1>
           <div className="row gap-md">
-            <span className="user-chip">{user?.name} · Spa &amp; Belleza</span>
+            <span className="user-chip">{user?.name} · Oasis Spa</span>
             <button
               className="btn-mini-ghost"
               onClick={() => {

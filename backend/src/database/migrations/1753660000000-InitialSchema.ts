@@ -57,12 +57,14 @@ export class InitialSchema1753660000000 implements MigrationInterface {
     `);
 
     // ---------- users ----------
+    // El id NO se genera aquí: es el mismo que emite Supabase Auth en
+    // `auth.users`. La clave foránea con ON DELETE CASCADE garantiza que no
+    // queden perfiles huérfanos si se elimina la cuenta de autenticación.
     await queryRunner.query(`
       CREATE TABLE "users" (
-        "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+        "id" uuid NOT NULL,
         "name" character varying(120) NOT NULL,
         "email" character varying(160) NOT NULL,
-        "password_hash" character varying(255) NOT NULL,
         "phone" character varying(30) NOT NULL DEFAULT '',
         "city" character varying(120) NOT NULL DEFAULT 'Manta, Manabí',
         "role" "users_role_enum" NOT NULL DEFAULT 'cliente',
@@ -74,7 +76,9 @@ export class InitialSchema1753660000000 implements MigrationInterface {
         "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
         CONSTRAINT "PK_users" PRIMARY KEY ("id"),
         CONSTRAINT "UQ_users_email" UNIQUE ("email"),
-        CONSTRAINT "CHK_users_points_positive" CHECK ("points" >= 0)
+        CONSTRAINT "CHK_users_points_positive" CHECK ("points" >= 0),
+        CONSTRAINT "FK_users_auth" FOREIGN KEY ("id")
+          REFERENCES "auth"."users"("id") ON DELETE CASCADE
       )
     `);
 

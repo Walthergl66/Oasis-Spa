@@ -8,6 +8,7 @@ Las clases con decoradores de TypeORM son la fuente de verdad; la migración
 
 ```mermaid
 erDiagram
+    AUTH_USERS ||--|| USERS : "identidad (Supabase Auth)"
     CATEGORIES ||--o{ SERVICES : clasifica
     CATEGORIES }o--o{ SPECIALISTS : habilita
     USERS ||--o| SPECIALISTS : "puede tener perfil"
@@ -27,11 +28,15 @@ erDiagram
         varchar color
         boolean active
     }
+    AUTH_USERS {
+        uuid id PK "gestionada por Supabase Auth"
+        varchar email
+        varchar encrypted_password
+    }
     USERS {
-        uuid id PK
+        uuid id PK,FK "= auth.users.id"
         varchar name
         varchar email UK
-        varchar password_hash
         varchar phone
         varchar city
         enum role "cliente|especialista|admin"
@@ -112,6 +117,23 @@ erDiagram
 Tablas de unión: `specialist_categories`, `user_favorite_services`, `promotion_services`.
 
 ## Decisiones y su justificación
+
+### 0. La identidad vive en Supabase Auth, el perfil en `public.users`
+
+Las credenciales, las sesiones y la recuperación de contraseña las gestiona
+Supabase Auth (GoTrue) en el schema `auth`. La tabla `users` del dominio no
+guarda contraseñas: es el **perfil**, y su clave primaria es el mismo `uuid` que
+emite `auth.users`, con `ON DELETE CASCADE`.
+
+Que el id sea compartido —en lugar de una columna `auth_user_id` aparte— evita
+que puedan existir dos perfiles para una misma cuenta y elimina un JOIN en cada
+consulta que parte del usuario autenticado: el `sub` del token **ya es** la
+clave del perfil.
+
+El correo se replica en `users.email` de forma deliberada. Es redundancia
+controlada: permite listar y buscar clientas en el panel administrativo sin
+consultar el schema `auth` en cada pantalla. El backend lo mantiene sincronizado
+cuando la usuaria cambia su correo.
 
 ### 1. `Category` como entidad, no como texto
 

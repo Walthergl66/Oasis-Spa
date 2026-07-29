@@ -4,7 +4,7 @@ export const Footer: React.FC = () => (
   <footer className="footer">
     <div className="footer-content">
       <div className="footer-col">
-        <div className="footer-brand">Spa &amp; Belleza</div>
+        <div className="footer-brand">Oasis Spa</div>
         <div>Manta, Manabí — Ecuador</div>
         <div>© {new Date().getFullYear()} Todos los derechos reservados.</div>
       </div>
@@ -16,7 +16,7 @@ export const Footer: React.FC = () => (
       <div className="footer-col">
         <strong>CONTACTO</strong>
         <div>📞 099 812 4471</div>
-        <div>✉ citas@spaybelleza.ec</div>
+        <div>✉ citas@oasisspa.ec</div>
       </div>
     </div>
   </footer>

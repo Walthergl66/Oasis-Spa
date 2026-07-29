@@ -98,14 +98,14 @@ export const Appointments: React.FC = () => {
             </div>
           </div>
           <div className="side-block-label">UBICACIÓN</div>
-          <div className="location-name">📍 Spa &amp; Belleza</div>
+          <div className="location-name">📍 Oasis Spa</div>
           <div className="location-addr">Manta, Manabí, Ecuador</div>
           <div className="side-block-label">HORARIO DE ATENCIÓN</div>
           <div className="location-addr">Lun a Sáb · 09:00 – 18:00</div>
           <div className="location-addr">Dom · 10:00 – 14:00</div>
           <div className="side-block-label">CONTACTO</div>
           <div className="location-addr">📞 099 812 4471</div>
-          <div className="location-addr">✉ citas@spaybelleza.ec</div>
+          <div className="location-addr">✉ citas@oasisspa.ec</div>
         </div>
       </div>
 

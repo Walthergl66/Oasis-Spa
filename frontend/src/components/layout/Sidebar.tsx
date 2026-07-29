@@ -17,7 +17,7 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">Spa &amp; Belleza</div>
+      <div className="sidebar-logo">Oasis Spa</div>
       <nav className="sidebar-nav">
         {ITEMS.map(item => (
           <NavLink key={item.to} to={item.to} className={({ isActive }) => (isActive ? 'active' : '')}>
@@ -30,7 +30,7 @@ export const Sidebar: React.FC = () => {
         <div className="specialist-avatar" style={{ width: 36, height: 36, fontSize: 12 }}>{user?.initials ?? 'SB'}</div>
         <div>
           <div className="sidebar-foot-name">{user?.name ?? 'Admin'}</div>
-          <div className="sidebar-foot-role">Spa &amp; Belleza</div>
+          <div className="sidebar-foot-role">Oasis Spa</div>
         </div>
       </div>
     </aside>

@@ -182,8 +182,8 @@ export class LunaSession {
     return lunaMessage(
       'bot',
       this.user
-        ? `¡Hola, ${name}! Soy Luna, tu asistente de Spa & Belleza. Puedo consultar horarios y agendar tu cita directamente. ¿Qué necesitas?`
-        : '¡Hola! Soy Luna, la asistente de Spa & Belleza. Puedo mostrarte servicios y promociones, y agendar tu cita si inicias sesión. ¿Qué te gustaría?',
+        ? `¡Hola, ${name}! Soy Luna, tu asistente de Oasis Spa. Puedo consultar horarios y agendar tu cita directamente. ¿Qué necesitas?`
+        : '¡Hola! Soy Luna, la asistente de Oasis Spa. Puedo mostrarte servicios y promociones, y agendar tu cita si inicias sesión. ¿Qué te gustaría?',
       { options: [{ label: 'Quiero reservar', value: 'Quiero reservar' }, { label: 'Ver promociones', value: 'Ver promociones' }, { label: 'Precios', value: 'Precios' }] },
     );
   }

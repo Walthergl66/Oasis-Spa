@@ -11,7 +11,7 @@
  *
  * Uso:  npm run seed
  */
-import * as bcrypt from 'bcryptjs';
+import { createClient } from '@supabase/supabase-js';
 import { AppDataSource } from '../data-source';
 import {
   Appointment,
@@ -45,6 +45,53 @@ const addDays = (date: Date, days: number): Date => {
   copy.setDate(copy.getDate() + days);
   return copy;
 };
+
+/**
+ * Cliente administrativo de Supabase. La clave `service_role` sólo se usa desde
+ * el servidor: permite crear cuentas sin confirmación por correo.
+ */
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321',
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
+  { auth: { autoRefreshToken: false, persistSession: false } },
+);
+
+/**
+ * Crea la cuenta en Supabase Auth y devuelve su id, que será la clave primaria
+ * del perfil. Si la cuenta ya existe (al re-ejecutar el seed) se reutiliza:
+ * `TRUNCATE users` borra los perfiles, pero no las cuentas de `auth.users`.
+ */
+async function ensureAuthUser(
+  email: string,
+  password: string,
+  name: string,
+): Promise<string> {
+  const { data, error } = await supabaseAdmin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { name },
+  });
+  if (data?.user) return data.user.id;
+
+  const alreadyExists = /already|registered|exists/i.test(error?.message ?? '');
+  if (!alreadyExists) {
+    throw new Error(`No se pudo crear la cuenta ${email}: ${error?.message}`);
+  }
+
+  const { data: list, error: listError } =
+    await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  if (listError) throw listError;
+
+  const found = list.users.find(
+    (user) => user.email?.toLowerCase() === email.toLowerCase(),
+  );
+  if (!found) throw new Error(`La cuenta ${email} existe pero no se encontró.`);
+
+  // Se realinea la contraseña por si el seed corrió antes con otra.
+  await supabaseAdmin.auth.admin.updateUserById(found.id, { password });
+  return found.id;
+}
 
 /** Construye una fecha con hora local a partir de un desfase en días. */
 const at = (offsetDays: number, time: string): Date => {
@@ -218,9 +265,10 @@ async function seed(): Promise<void> {
       specialists.find((item) => item.name === name)!;
 
     // ---------- Usuarios ----------
-    // Contraseñas de demostración; en producción las define cada usuaria.
-    const clientPassword = await bcrypt.hash('demo1234', 10);
-    const adminPassword = await bcrypt.hash('admin1234', 10);
+    // Las credenciales las crea Supabase Auth, no esta base: aquí sólo se
+    // guarda el perfil, con el mismo id que emite `auth.users`.
+    const CLIENT_PASSWORD = 'demo1234';
+    const ADMIN_PASSWORD = 'admin1234';
 
     const userData = [
       {
@@ -288,28 +336,41 @@ async function seed(): Promise<void> {
       },
     ];
 
-    const clients = await manager.save(
-      userData.map((data) =>
-        manager.create(User, {
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-          passwordHash: clientPassword,
-          role: UserRole.CLIENTE,
-          points: data.points,
-          level: data.level,
-          memberSince: data.memberSince,
-          favoriteServices: data.favorites.map(service),
-        }),
-      ),
-    );
+    const clients: User[] = [];
+    for (const data of userData) {
+      const authId = await ensureAuthUser(
+        data.email,
+        CLIENT_PASSWORD,
+        data.name,
+      );
+      clients.push(
+        await manager.save(
+          manager.create(User, {
+            id: authId,
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            role: UserRole.CLIENTE,
+            points: data.points,
+            level: data.level,
+            memberSince: data.memberSince,
+            favoriteServices: data.favorites.map(service),
+          }),
+        ),
+      );
+    }
 
+    const adminId = await ensureAuthUser(
+      'admin@oasisspa.ec',
+      ADMIN_PASSWORD,
+      'Administración Spa',
+    );
     await manager.save(
       manager.create(User, {
+        id: adminId,
         name: 'Administración Spa',
-        email: 'admin@spaybelleza.ec',
+        email: 'admin@oasisspa.ec',
         phone: '052 620 118',
-        passwordHash: adminPassword,
         role: UserRole.ADMIN,
         memberSince: '2024-01-01',
       }),

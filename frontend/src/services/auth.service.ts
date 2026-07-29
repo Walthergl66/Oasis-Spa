@@ -78,7 +78,7 @@ export const authService = {
           data.users.push(user);
           data.credentials[user.email] = input.password;
           data.notifications.unshift({
-            id: newId('ntf'), userId: user.id, icon: '🌿', title: '¡Bienvenida a Spa & Belleza!',
+            id: newId('ntf'), userId: user.id, icon: '🌿', title: '¡Bienvenida a Oasis Spa!',
             text: 'Tienes 20% de descuento en tu primer servicio. Luna puede agendarlo por ti.',
             createdAt: new Date().toISOString(), read: false,
           });

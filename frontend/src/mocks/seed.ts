@@ -58,7 +58,7 @@ export const SEED_SPECIALISTS: Specialist[] = [
 /** Contraseñas de demo: se guardan aparte del usuario, igual que hará el backend. */
 export const SEED_CREDENTIALS: Record<string, string> = {
   'adriana.torres@email.com': 'demo1234',
-  'admin@spaybelleza.ec': 'admin1234',
+  'admin@oasisspa.ec': 'admin1234',
 };
 
 export const SEED_USERS: User[] = [
@@ -69,7 +69,7 @@ export const SEED_USERS: User[] = [
   { id: 'usr-5', name: 'Valentina Ponce', email: 'valentina.ponce@email.com', phone: '097 448 9021', city: 'Manta, Manabí', role: 'cliente', initials: 'VP', memberSince: '2026-05-30', points: 40, level: 'Bronce', favoriteServices: [], active: true },
   { id: 'usr-6', name: 'Isabel Loor', email: 'isabel.loor@email.com', phone: '098 917 3345', city: 'Manta, Manabí', role: 'cliente', initials: 'IL', memberSince: '2024-08-14', points: 540, level: 'Oro', favoriteServices: ['Manicura Glossy'], active: true },
   { id: 'usr-7', name: 'Paola Mendoza', email: 'paola.mendoza@email.com', phone: '096 620 7788', city: 'Manta, Manabí', role: 'cliente', initials: 'PM', memberSince: '2026-01-19', points: 20, level: 'Bronce', favoriteServices: [], active: true },
-  { id: 'usr-admin', name: 'Administración Spa', email: 'admin@spaybelleza.ec', phone: '052 620 118', city: 'Manta, Manabí', role: 'admin', initials: 'SB', memberSince: '2024-01-01', points: 0, level: 'Bronce', favoriteServices: [], active: true },
+  { id: 'usr-admin', name: 'Administración Spa', email: 'admin@oasisspa.ec', phone: '052 620 118', city: 'Manta, Manabí', role: 'admin', initials: 'SB', memberSince: '2024-01-01', points: 0, level: 'Bronce', favoriteServices: [], active: true },
 ];
 
 export const SEED_PROMOTIONS: Promotion[] = [

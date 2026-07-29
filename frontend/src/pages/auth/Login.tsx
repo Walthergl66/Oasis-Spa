@@ -39,7 +39,7 @@ export const Login: React.FC = () => {
 
       <div className="auth-panel">
         <form className="auth-form" onSubmit={submit}>
-          <div className="logo mb-md">Spa<span>&amp; BELLEZA</span></div>
+          <div className="logo mb-md">Oasis<span>SPA</span></div>
           <h1>Iniciar sesión</h1>
           <p className="auth-sub">Ingresa con tu correo para ver tus reservas.</p>
 
@@ -75,7 +75,7 @@ export const Login: React.FC = () => {
           <div className="auth-demo">
             <strong>Cuentas de prueba</strong><br />
             Clienta: adriana.torres@email.com · demo1234<br />
-            Administración: admin@spaybelleza.ec · admin1234
+            Administración: admin@oasisspa.ec · admin1234
           </div>
         </form>
       </div>

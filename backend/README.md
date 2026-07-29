@@ -1,4 +1,4 @@
-# API Spa & Belleza (NestJS)
+# API Oasis Spa (NestJS)
 
 Backend del sistema de gestión de citas y servicios para spas de belleza.
 Stack: **NestJS + TypeORM + PostgreSQL (Supabase)**.
@@ -101,4 +101,4 @@ Tras ejecutar el seed:
 | Rol | Correo | Contraseña |
 | --- | --- | --- |
 | Clienta | `adriana.torres@email.com` | `demo1234` |
-| Administración | `admin@spaybelleza.ec` | `admin1234` |
+| Administración | `admin@oasisspa.ec` | `admin1234` |

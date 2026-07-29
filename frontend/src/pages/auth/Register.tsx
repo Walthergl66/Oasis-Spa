@@ -28,7 +28,7 @@ export const Register: React.FC = () => {
     setLoading(true);
     try {
       await register({ name: form.name, email: form.email, password: form.password, phone: form.phone, city: form.city });
-      toast('¡Cuenta creada! Bienvenida a Spa & Belleza.');
+      toast('¡Cuenta creada! Bienvenida a Oasis Spa.');
       navigate('/', { replace: true });
     } catch {
       setError(useAuthStore.getState().error ?? 'No pudimos crear tu cuenta.');
@@ -47,7 +47,7 @@ export const Register: React.FC = () => {
 
       <div className="auth-panel">
         <form className="auth-form" onSubmit={submit}>
-          <div className="logo mb-md">Spa<span>&amp; BELLEZA</span></div>
+          <div className="logo mb-md">Oasis<span>SPA</span></div>
           <h1>Crear cuenta</h1>
           <p className="auth-sub">Es rápido: sólo necesitamos tus datos de contacto.</p>
 
