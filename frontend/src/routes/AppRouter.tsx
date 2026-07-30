@@ -1,55 +1,68 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { UserLayout } from '../layouts/UserLayout';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
+import { ProtectedRoute } from '../components/common/ProtectedRoute';
 import { AdminLayout } from '../layouts/AdminLayout';
+import { UserLayout } from '../layouts/UserLayout';
 
-// Auth pages
+// Autenticación
 import { Login } from '../pages/auth/Login';
 import { Register } from '../pages/auth/Register';
 
-// User pages
-import { Home } from '../pages/user/Home';
-import { Services } from '../pages/user/Services';
-import { Booking } from '../pages/user/Booking';
+// Cliente
 import { Appointments } from '../pages/user/Appointments';
-import { Promotions } from '../pages/user/Promotions';
+import { Booking } from '../pages/user/Booking';
+import { Home } from '../pages/user/Home';
 import { Profile } from '../pages/user/Profile';
+import { Promotions } from '../pages/user/Promotions';
+import { Services } from '../pages/user/Services';
 
-// Admin pages
+// Administración
+import { AdminAppointments } from '../pages/admin/Appointments';
+import { AdminClients } from '../pages/admin/Clients';
 import { Dashboard } from '../pages/admin/Dashboard';
-import AdminAppointments from '../pages/admin/Appointments';
-import AdminServices from '../pages/admin/Services';
-import AdminStaff from '../pages/admin/Staff';
-import AdminPromotions from '../pages/admin/Promotions';
-import AdminReports from '../pages/admin/Reports';
+import { AdminPromotions } from '../pages/admin/Promotions';
+import { AdminReports } from '../pages/admin/Reports';
+import { AdminServices } from '../pages/admin/Services';
+import { AdminStaff } from '../pages/admin/Staff';
 
-export const AppRouter: React.FC = () => {
-  return (
-    <Router>
-      <Routes>
-        {/* Auth Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+/** Envuelve una página del cliente en su layout. */
+const client = (element: React.ReactNode) => <UserLayout>{element}</UserLayout>;
 
-        {/* User Routes */}
-        <Route path="/" element={<UserLayout><Home /></UserLayout>} />
-        <Route path="/services" element={<UserLayout><Services /></UserLayout>} />
-        <Route path="/booking" element={<UserLayout><Booking /></UserLayout>} />
-        <Route path="/appointments" element={<UserLayout><Appointments /></UserLayout>} />
-        <Route path="/promotions" element={<UserLayout><Promotions /></UserLayout>} />
-        <Route path="/profile" element={<UserLayout><Profile /></UserLayout>} />
+/** Envuelve una página administrativa: layout + protección por rol. */
+const admin = (element: React.ReactNode) => (
+  <ProtectedRoute adminOnly>
+    <AdminLayout>{element}</AdminLayout>
+  </ProtectedRoute>
+);
 
-        {/* Admin Routes */}
-        <Route path="/admin/dashboard" element={<AdminLayout><Dashboard /></AdminLayout>} />
-        <Route path="/admin/appointments" element={<AdminLayout><AdminAppointments /></AdminLayout>} />
-        <Route path="/admin/services" element={<AdminLayout><AdminServices /></AdminLayout>} />
-        <Route path="/admin/staff" element={<AdminLayout><AdminStaff /></AdminLayout>} />
-        <Route path="/admin/promotions" element={<AdminLayout><AdminPromotions /></AdminLayout>} />
-        <Route path="/admin/reports" element={<AdminLayout><AdminReports /></AdminLayout>} />
+export const AppRouter: React.FC = () => (
+  <Router>
+    <Routes>
+      {/* Autenticación */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
-  );
-};
+      {/* Cliente — públicas */}
+      <Route path="/" element={client(<Home />)} />
+      <Route path="/services" element={client(<Services />)} />
+      <Route path="/promotions" element={client(<Promotions />)} />
+
+      {/* Cliente — requieren sesión */}
+      <Route path="/booking" element={<ProtectedRoute>{client(<Booking />)}</ProtectedRoute>} />
+      <Route path="/appointments" element={<ProtectedRoute>{client(<Appointments />)}</ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute>{client(<Profile />)}</ProtectedRoute>} />
+
+      {/* Administración */}
+      <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+      <Route path="/admin/dashboard" element={admin(<Dashboard />)} />
+      <Route path="/admin/appointments" element={admin(<AdminAppointments />)} />
+      <Route path="/admin/services" element={admin(<AdminServices />)} />
+      <Route path="/admin/staff" element={admin(<AdminStaff />)} />
+      <Route path="/admin/clients" element={admin(<AdminClients />)} />
+      <Route path="/admin/promotions" element={admin(<AdminPromotions />)} />
+      <Route path="/admin/reports" element={admin(<AdminReports />)} />
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  </Router>
+);

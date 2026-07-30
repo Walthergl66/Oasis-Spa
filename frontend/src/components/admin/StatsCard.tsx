@@ -1,17 +1,19 @@
 import React from 'react';
 
 interface StatsCardProps {
-  title: string;
+  label: string;
   value: number | string;
-  icon?: React.ReactNode;
+  delta?: string;
+  tone?: 'green' | 'yellow' | 'accent';
 }
 
-export const StatsCard: React.FC<StatsCardProps> = ({ title, value, icon }) => {
+export const StatsCard: React.FC<StatsCardProps> = ({ label, value, delta, tone = 'green' }) => {
+  const color = tone === 'green' ? 'var(--green)' : tone === 'yellow' ? 'var(--yellow)' : 'var(--accent)';
   return (
-    <div className="stats-card">
-      {icon && <div className="stats-icon">{icon}</div>}
-      <h3>{title}</h3>
-      <p className="stats-value">{value}</p>
+    <div className="kpi-card">
+      <div className="kpi-label">{label}</div>
+      <div className="kpi-value">{value}</div>
+      {delta && <div className="kpi-delta" style={{ color }}>{delta}</div>}
     </div>
   );
 };

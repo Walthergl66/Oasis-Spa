@@ -1,98 +1,125 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# API Oasis Spa (NestJS)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend del sistema de gestión de citas y servicios para spas de belleza.
+Stack: **NestJS + TypeORM + PostgreSQL (Supabase)**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Estado
 
-## Description
+| Fase | Alcance | Estado |
+| --- | --- | --- |
+| 1 | Entidades y esquema de base de datos | ✅ completada |
+| 2 | Endpoints REST — módulo `auth` | ✅ completado |
+| 2 | Endpoints REST — `services`, `appointments`, `reports`, recordatorios | pendiente |
+| 3 | `/api/luna/chat` con ejecución de funciones (tool use) | pendiente |
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Autenticación
 
-## Project setup
+La identidad la gestiona **Supabase Auth**; NestJS actúa de intermediario para
+que el refresh token viaje en una **cookie httpOnly** y no en `localStorage`.
 
-```bash
-$ npm install
-```
+| Método | Ruta | Acceso |
+| --- | --- | --- |
+| POST | `/api/auth/register` | público (siempre rol `cliente`) |
+| POST | `/api/auth/login` | público |
+| POST | `/api/auth/refresh` | público (usa la cookie) |
+| POST | `/api/auth/logout` | público |
+| GET | `/api/auth/me` | sesión válida |
 
-## Compile and run the project
+El access token se verifica **localmente contra el JWKS de Supabase** (ES256),
+sin llamar a GoTrue en cada petición. El rol no se lee del token sino de la
+tabla `users`, para que revocar permisos surta efecto de inmediato.
 
-```bash
-# development
-$ npm run start
+Los guards son **globales**: todo endpoint exige sesión salvo que se marque con
+`@Public()`, y `@Roles(...)` restringe por rol.
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
+## Puesta en marcha
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Copia `.env.example` a `.env` y completa los datos de conexión (en Supabase:
+*Project Settings → Database → Connection string*).
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run migration:run   # crea el esquema
+npm run seed            # carga datos de demostración
+npm run start:dev       # API en http://localhost:3000/api
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Arquitectura
 
-## Resources
+**Monolito modular**, no microservicios. Cada dominio es un módulo generado con
+`nest g resource`, con su entidad, repositorio, servicio, controlador y DTOs.
+Los módulos se comunican **inyectando el servicio del otro, nunca su
+repositorio**: `TypeOrmModule.forFeature` publica cada repositorio sólo dentro
+de su módulo, así que el límite de responsabilidad está garantizado por el
+contenedor de dependencias y no por disciplina del programador.
 
-Check out a few resources that may come in handy when working with NestJS:
+Se descartaron los microservicios porque crear una cita exige leer la duración
+del servicio y la agenda de la especialista en la **misma transacción**, y la
+restricción que impide solapes vive en una sola base. Repartirlo en procesos
+obligaría a transacciones distribuidas sin ninguna ganancia para el volumen de
+un spa.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```
+src/
+  config/database.config.ts        Conexión a PostgreSQL para la aplicación
+  database/
+    entities.ts                    Registro único de entidades
+    data-source.ts                 DataSource para la CLI (migraciones y seed)
+    migrations/                    Esquema versionado y reversible
+    seeds/seed.ts                  Datos iniciales (los mismos del frontend)
+  modules/
+    <dominio>/
+      <dominio>.module.ts          Límite del módulo: qué importa y qué exporta
+      <dominio>.controller.ts      Endpoints (Fase 2)
+      <dominio>.service.ts         Lógica de negocio (Fase 2)
+      dto/                         Validación de entrada con class-validator
+      entities/*.entity.ts         Modelo de dominio
+docs/modelo-datos.md               Diagrama ER y justificación de cada decisión
+```
 
-## Support
+Dependencias entre módulos:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```
+categories ← services ← promotions
+     ↑          ↑
+specialists     └── reviews
+     ↑          ↑
+     └── appointments → users
+                ↓
+          notifications
+```
 
-## Stay in touch
+`notifications` no depende de nadie: es un servicio de salida al que los demás
+le piden emitir avisos, lo que evita ciclos.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Modelo de datos
 
-## License
+Las entidades son la fuente de verdad: el esquema se deriva de ellas, no al
+revés. El diagrama entidad-relación y el razonamiento detrás de cada decisión
+(por qué la categoría es una tabla, por qué la cita duplica precio y duración,
+por qué el solape se impide en la base) están en
+[`docs/modelo-datos.md`](docs/modelo-datos.md).
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## Migraciones
+
+```bash
+npm run migration:run       # aplica las pendientes
+npm run migration:revert    # deshace la última
+npm run migration:generate  # genera una nueva a partir de cambios en entidades
+npm run schema:log          # muestra el SQL que faltaría aplicar, sin ejecutarlo
+```
+
+`synchronize` está desactivado a propósito: todo cambio de esquema pasa por una
+migración revisable.
+
+## Cuentas de demostración
+
+Tras ejecutar el seed:
+
+| Rol | Correo | Contraseña |
+| --- | --- | --- |
+| Clienta | `adriana.torres@email.com` | `demo1234` |
+| Administración | `admin@oasisspa.ec` | `admin1234` |
