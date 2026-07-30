@@ -1,17 +1,21 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { buildDatabaseConfig } from './config/database.config';
+import { AppointmentsModule } from './modules/appointments/appointments.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { PromotionsModule } from './modules/promotions/promotions.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
 import { ServicesModule } from './modules/services/services.module';
 import { SpecialistsModule } from './modules/specialists/specialists.module';
 import { UsersModule } from './modules/users/users.module';
-import { AppointmentsModule } from './modules/appointments/appointments.module';
-import { ReviewsModule } from './modules/reviews/reviews.module';
-import { PromotionsModule } from './modules/promotions/promotions.module';
-import { NotificationsModule } from './modules/notifications/notifications.module';
 
 /**
  * Módulo raíz: arquitectura modular sobre un solo proceso.
@@ -26,8 +30,9 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
  * esto en procesos obligaría a transacciones distribuidas sin ninguna ganancia
  * para el volumen de un spa.
  *
- * El orden de importación refleja las dependencias: primero las tablas base,
- * después los módulos que las consumen.
+ * Los guards se registran aquí como globales: **todo endpoint exige sesión
+ * salvo que se marque con `@Public()`**. Es la política segura por defecto —
+ * olvidar proteger algo no abre un agujero, sólo olvidar abrirlo da un 401.
  */
 @Module({
   imports: [
@@ -36,6 +41,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
       inject: [ConfigService],
       useFactory: buildDatabaseConfig,
     }),
+    AuthModule,
     CategoriesModule,
     ServicesModule,
     SpecialistsModule,
@@ -46,6 +52,10 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     NotificationsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+  ],
 })
 export class AppModule {}

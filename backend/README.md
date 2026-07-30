@@ -8,8 +8,29 @@ Stack: **NestJS + TypeORM + PostgreSQL (Supabase)**.
 | Fase | Alcance | Estado |
 | --- | --- | --- |
 | 1 | Entidades y esquema de base de datos | ✅ completada |
-| 2 | Endpoints REST (empezando por servicios y citas) | pendiente |
+| 2 | Endpoints REST — módulo `auth` | ✅ completado |
+| 2 | Endpoints REST — `services`, `appointments`, `reports`, recordatorios | pendiente |
 | 3 | `/api/luna/chat` con ejecución de funciones (tool use) | pendiente |
+
+## Autenticación
+
+La identidad la gestiona **Supabase Auth**; NestJS actúa de intermediario para
+que el refresh token viaje en una **cookie httpOnly** y no en `localStorage`.
+
+| Método | Ruta | Acceso |
+| --- | --- | --- |
+| POST | `/api/auth/register` | público (siempre rol `cliente`) |
+| POST | `/api/auth/login` | público |
+| POST | `/api/auth/refresh` | público (usa la cookie) |
+| POST | `/api/auth/logout` | público |
+| GET | `/api/auth/me` | sesión válida |
+
+El access token se verifica **localmente contra el JWKS de Supabase** (ES256),
+sin llamar a GoTrue en cada petición. El rol no se lee del token sino de la
+tabla `users`, para que revocar permisos surta efecto de inmediato.
+
+Los guards son **globales**: todo endpoint exige sesión salvo que se marque con
+`@Public()`, y `@Roles(...)` restringe por rol.
 
 ## Puesta en marcha
 

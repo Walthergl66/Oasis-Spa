@@ -1,17 +1,25 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // El frontend ya apunta a http://localhost:3000/api (VITE_API_URL).
+  // Las dos aplicaciones apuntan a http://localhost:3000/api.
   app.setGlobalPrefix('api');
 
-  app.enableCors({
-    origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
-    credentials: true,
-  });
+  // Necesario para leer la cookie httpOnly con el refresh token.
+  app.use(cookieParser());
+
+  // `credentials: true` es lo que permite que el navegador envíe esa cookie
+  // en las peticiones a /api/auth/refresh desde otro puerto.
+  const origins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  app.enableCors({ origin: origins, credentials: true });
 
   // Valida y transforma los DTO de entrada; descarta propiedades no declaradas.
   app.useGlobalPipes(
