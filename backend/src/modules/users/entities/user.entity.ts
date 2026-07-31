@@ -7,7 +7,7 @@ import {
   ManyToMany,
   OneToMany,
   OneToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Appointment } from '../../appointments/entities/appointment.entity';
@@ -29,18 +29,16 @@ export enum LoyaltyLevel {
 }
 
 /**
- * Perfil de una persona del sistema: clienta, especialista o administración.
- *
- * La IDENTIDAD (credenciales, sesiones, recuperación de contraseña) no vive
- * aquí: la gestiona Supabase Auth en `auth.users`. Esta tabla es el perfil de
- * dominio y su `id` es el mismo identificador que emite Supabase, de modo que
- * hay exactamente un perfil por cuenta y la relación no puede desincronizarse.
- * Por eso el id NO se autogenera: lo asigna el backend con el `sub` del usuario
- * recién creado en Supabase.
+ * Persona del sistema: clienta, especialista o administración.
  *
  * Un solo `users` con rol, en lugar de tablas separadas, porque los tres tipos
- * comparten identidad. Los datos propios del trabajo (especialidades,
- * valoración, estado) viven en `specialists`, enlazada uno a uno.
+ * comparten identidad y autenticación. Los datos propios del trabajo
+ * (especialidades, valoración, estado) viven en `specialists`, enlazada uno a
+ * uno.
+ *
+ * La autenticación es propia del sistema: aquí se guarda el hash de la
+ * contraseña —nunca la contraseña— y las sesiones activas viven en
+ * `refresh_tokens`.
  *
  * `points` y `level` se almacenan en lugar de recalcularse en cada consulta:
  * son parte del estado del programa de fidelidad y cambian sólo cuando una cita
@@ -48,21 +46,40 @@ export enum LoyaltyLevel {
  */
 @Entity('users')
 export class User {
-  /** Igual a `auth.users.id`. Lo asigna Supabase Auth, no la base. */
-  @PrimaryColumn({ type: 'uuid' })
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'varchar', length: 120 })
   name: string;
 
-  /**
-   * Copia del correo con el que se autentica. Supabase lo guarda en
-   * `auth.users`; aquí se replica para poder listar y buscar clientas sin
-   * consultar el schema de autenticación en cada pantalla del panel.
-   */
   @Index({ unique: true })
   @Column({ type: 'varchar', length: 160 })
   email: string;
+
+  /**
+   * Hash bcrypt de la contraseña.
+   *
+   * `select: false` hace que NO se incluya en las consultas normales: para
+   * filtrarlo habría que acordarse en cada `find`, y basta un descuido para
+   * devolverlo en una respuesta. Quien lo necesita (el login) lo pide de forma
+   * explícita.
+   */
+  @Column({
+    name: 'password_hash',
+    type: 'varchar',
+    length: 255,
+    select: false,
+  })
+  passwordHash: string;
+
+  /**
+   * Correo confirmado mediante el enlace enviado al registrarse.
+   *
+   * La columna existe desde el inicio aunque el envío por SMTP llegue después:
+   * añadirla más tarde obligaría a otra migración sobre datos ya cargados.
+   */
+  @Column({ name: 'email_verified', type: 'boolean', default: false })
+  emailVerified: boolean;
 
   @Column({ type: 'varchar', length: 30, default: '' })
   phone: string;

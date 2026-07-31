@@ -11,6 +11,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { numericTransformer } from '../../../common/numeric.transformer';
 import { Appointment } from '../../appointments/entities/appointment.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { User } from '../../users/entities/user.entity';
@@ -47,7 +48,13 @@ export class Specialist {
   @Column({ type: 'varchar', length: 4, default: '' })
   initials: string;
 
-  @Column({ type: 'numeric', precision: 2, scale: 1, default: 5 })
+  @Column({
+    type: 'numeric',
+    precision: 2,
+    scale: 1,
+    default: 5,
+    transformer: numericTransformer,
+  })
   rating: number;
 
   @Column({

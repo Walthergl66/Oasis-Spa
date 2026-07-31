@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { numericTransformer } from '../../../common/numeric.transformer';
 import { Category } from '../../categories/entities/category.entity';
 import { Appointment } from '../../appointments/entities/appointment.entity';
 import { Review } from '../../reviews/entities/review.entity';
@@ -49,7 +50,12 @@ export class Service {
   @Column({ name: 'duration_min', type: 'int' })
   durationMin: number;
 
-  @Column({ type: 'numeric', precision: 10, scale: 2 })
+  @Column({
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+    transformer: numericTransformer,
+  })
   price: number;
 
   @Column({ name: 'image_url', type: 'varchar', length: 255, default: '' })
@@ -60,7 +66,13 @@ export class Service {
   popular: boolean;
 
   /** Promedio de valoraciones; se recalcula al crear una reseña. */
-  @Column({ type: 'numeric', precision: 2, scale: 1, default: 0 })
+  @Column({
+    type: 'numeric',
+    precision: 2,
+    scale: 1,
+    default: 0,
+    transformer: numericTransformer,
+  })
   rating: number;
 
   @Column({ name: 'reviews_count', type: 'int', default: 0 })

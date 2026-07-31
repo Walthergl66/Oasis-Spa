@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { numericTransformer } from '../../../common/numeric.transformer';
 import { Review } from '../../reviews/entities/review.entity';
 import { Service } from '../../services/entities/service.entity';
 import { Specialist } from '../../specialists/entities/specialist.entity';
@@ -103,7 +104,12 @@ export class Appointment {
   durationMin: number;
 
   /** Precio vigente al momento de reservar. */
-  @Column({ type: 'numeric', precision: 10, scale: 2 })
+  @Column({
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+    transformer: numericTransformer,
+  })
   price: number;
 
   @Index()

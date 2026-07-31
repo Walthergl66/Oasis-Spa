@@ -57,14 +57,16 @@ export class InitialSchema1753660000000 implements MigrationInterface {
     `);
 
     // ---------- users ----------
-    // El id NO se genera aquí: es el mismo que emite Supabase Auth en
-    // `auth.users`. La clave foránea con ON DELETE CASCADE garantiza que no
-    // queden perfiles huérfanos si se elimina la cuenta de autenticación.
+    // La autenticación es propia del sistema: aquí vive el hash de la
+    // contraseña. `email_verified` se crea desde el inicio aunque el envío por
+    // correo llegue después, para no necesitar otra migración más adelante.
     await queryRunner.query(`
       CREATE TABLE "users" (
-        "id" uuid NOT NULL,
+        "id" uuid NOT NULL DEFAULT gen_random_uuid(),
         "name" character varying(120) NOT NULL,
         "email" character varying(160) NOT NULL,
+        "password_hash" character varying(255) NOT NULL,
+        "email_verified" boolean NOT NULL DEFAULT false,
         "phone" character varying(30) NOT NULL DEFAULT '',
         "city" character varying(120) NOT NULL DEFAULT 'Manta, Manabí',
         "role" "users_role_enum" NOT NULL DEFAULT 'cliente',
@@ -76,11 +78,30 @@ export class InitialSchema1753660000000 implements MigrationInterface {
         "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
         CONSTRAINT "PK_users" PRIMARY KEY ("id"),
         CONSTRAINT "UQ_users_email" UNIQUE ("email"),
-        CONSTRAINT "CHK_users_points_positive" CHECK ("points" >= 0),
-        CONSTRAINT "FK_users_auth" FOREIGN KEY ("id")
-          REFERENCES "auth"."users"("id") ON DELETE CASCADE
+        CONSTRAINT "CHK_users_points_positive" CHECK ("points" >= 0)
       )
     `);
+
+    // ---------- refresh_tokens (sesiones activas) ----------
+    // Se guarda el HASH del token, nunca el token: leer esta tabla no
+    // permite suplantar ninguna sesión.
+    await queryRunner.query(`
+      CREATE TABLE "refresh_tokens" (
+        "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+        "user_id" uuid NOT NULL,
+        "token_hash" character varying(64) NOT NULL,
+        "expires_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+        "revoked_at" TIMESTAMP WITH TIME ZONE,
+        "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+        CONSTRAINT "PK_refresh_tokens" PRIMARY KEY ("id"),
+        CONSTRAINT "UQ_refresh_tokens_hash" UNIQUE ("token_hash"),
+        CONSTRAINT "FK_refresh_tokens_user" FOREIGN KEY ("user_id")
+          REFERENCES "users"("id") ON DELETE CASCADE
+      )
+    `);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_refresh_tokens_user" ON "refresh_tokens" ("user_id", "revoked_at")`,
+    );
 
     // ---------- services ----------
     await queryRunner.query(`
@@ -330,6 +351,7 @@ export class InitialSchema1753660000000 implements MigrationInterface {
     await queryRunner.query(
       `DROP FUNCTION IF EXISTS "appointments_set_ends_at"()`,
     );
+    await queryRunner.query(`DROP TABLE IF EXISTS "refresh_tokens"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "notifications"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "promotion_services"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "promotions"`);

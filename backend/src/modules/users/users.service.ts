@@ -4,24 +4,20 @@ import { Repository } from 'typeorm';
 import { LoyaltyLevel, User, UserRole } from './entities/user.entity';
 
 export interface CreateProfileInput {
-  /** Identificador emitido por Supabase Auth: es la clave primaria del perfil. */
-  id: string;
   name: string;
   email: string;
+  /** Hash bcrypt; el módulo de autenticación es quien lo calcula. */
+  passwordHash: string;
   phone?: string;
   city?: string;
   role?: UserRole;
 }
 
 /**
- * Perfiles de usuario.
+ * Usuarios del sistema.
  *
- * Este servicio NO gestiona credenciales: de eso se encarga Supabase Auth. Aquí
- * vive únicamente el dato de dominio (nombre, contacto, rol, fidelidad).
- *
- * Por ahora expone lo que necesita el módulo de autenticación; el resto de
- * operaciones (perfil editable, base de clientas del panel) se completa junto
- * con los endpoints de usuarios.
+ * Por ahora expone lo que necesita la autenticación; el perfil editable y la
+ * base de clientas del panel se completan junto con el resto del módulo.
  */
 @Injectable()
 export class UsersService {
@@ -46,15 +42,30 @@ export class UsersService {
     });
   }
 
-  /** Crea el perfil asociado a una cuenta ya existente en Supabase Auth. */
+  /**
+   * Igual que `findByEmail`, pero incluyendo el hash de la contraseña.
+   *
+   * Existe como método aparte para que traer el hash sea siempre una decisión
+   * consciente: la columna está marcada `select: false` justamente para que no
+   * aparezca por accidente en ninguna otra consulta.
+   */
+  findByEmailWithPassword(email: string): Promise<User | null> {
+    return this.repository
+      .createQueryBuilder('user')
+      .addSelect('user.passwordHash')
+      .where('LOWER(user.email) = LOWER(:email)', { email: email.trim() })
+      .getOne();
+  }
+
   createProfile(input: CreateProfileInput): Promise<User> {
     const user = this.repository.create({
-      id: input.id,
       name: input.name.trim(),
       email: input.email.trim().toLowerCase(),
+      passwordHash: input.passwordHash,
       phone: input.phone?.trim() ?? '',
       city: input.city?.trim() || 'Manta, Manabí',
       role: input.role ?? UserRole.CLIENTE,
+      emailVerified: false,
       points: 0,
       level: LoyaltyLevel.BRONCE,
       memberSince: new Date().toISOString().slice(0, 10),

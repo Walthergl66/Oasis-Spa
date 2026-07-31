@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { numericTransformer } from '../../../common/numeric.transformer';
 import { Service } from '../../services/entities/service.entity';
 
 export enum PromotionColor {
@@ -60,6 +61,7 @@ export class Promotion {
     precision: 10,
     scale: 2,
     nullable: true,
+    transformer: numericTransformer,
   })
   priceBefore: number | null;
 
@@ -69,6 +71,7 @@ export class Promotion {
     precision: 10,
     scale: 2,
     nullable: true,
+    transformer: numericTransformer,
   })
   priceNow: number | null;
 
