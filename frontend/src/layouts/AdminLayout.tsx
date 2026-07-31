@@ -1,22 +1,23 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Sidebar } from '../components/admin/Sidebar';
+import { Sidebar } from '../components/layout/Sidebar';
 import { useAuthStore } from '../store/authStore';
 
 const TITLES: Record<string, string> = {
-  '/dashboard': 'Panel administrativo',
-  '/appointments': 'Agenda',
-  '/services': 'Gestión de servicios',
-  '/staff': 'Especialistas',
-  '/clients': 'Base de clientas',
-  '/promotions': 'Gestión de promociones',
-  '/reports': 'Reportes y estadísticas',
+  '/admin/dashboard': 'Panel administrativo',
+  '/admin/appointments': 'Agenda',
+  '/admin/services': 'Gestión de servicios',
+  '/admin/staff': 'Especialistas',
+  '/admin/clients': 'Base de clientas',
+  '/admin/promotions': 'Gestión de promociones',
+  '/admin/reports': 'Reportes y estadísticas',
 };
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
+/** Marco del componente administrativo: menú lateral y barra superior. */
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const { pathname } = useLocation();
   const user = useAuthStore(state => state.user);

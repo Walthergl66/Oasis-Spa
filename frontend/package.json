@@ -1,6 +1,6 @@
 {
-  "name": "oasis-cliente",
-  "description": "PWA de la clienta de Oasis Spa",
+  "name": "oasis-spa",
+  "description": "PWA de gestión de citas y servicios de Oasis Spa",
   "private": true,
   "version": "0.0.0",
   "type": "module",

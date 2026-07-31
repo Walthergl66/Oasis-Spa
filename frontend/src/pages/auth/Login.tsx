@@ -20,10 +20,12 @@ export const Login: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      // El panel administrativo es otra aplicación: aquí sólo se entra a la
-      // experiencia de la clienta, sea cual sea el rol de la cuenta.
-      await login(email, password);
-      navigate(from ?? '/', { replace: true });
+      const user = await login(email, password);
+      // El personal entra directo a su componente; la clienta, a la portada.
+      navigate(
+        user.role === 'cliente' ? (from ?? '/') : '/admin/dashboard',
+        { replace: true },
+      );
     } catch {
       setError(useAuthStore.getState().error ?? 'No pudimos iniciar sesión.');
     } finally {
@@ -75,8 +77,9 @@ export const Login: React.FC = () => {
           </div>
 
           <div className="auth-demo">
-            <strong>Cuenta de prueba</strong><br />
-            adriana.torres@email.com · demo1234
+            <strong>Cuentas de prueba</strong><br />
+            Clienta: adriana.torres@email.com · demo1234<br />
+            Administración: admin@oasisspa.ec · admin1234
           </div>
         </form>
       </div>

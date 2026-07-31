@@ -2,20 +2,17 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 
-/**
- * Menú del panel. Las rutas cuelgan de la raíz porque esta aplicación es
- * únicamente el panel administrativo.
- */
 const ITEMS = [
-  { to: '/dashboard', label: 'Dashboard', icon: '▤' },
-  { to: '/appointments', label: 'Agenda', icon: '🗓' },
-  { to: '/services', label: 'Servicios', icon: '✦' },
-  { to: '/staff', label: 'Especialistas', icon: '👤' },
-  { to: '/clients', label: 'Clientas', icon: '☺' },
-  { to: '/promotions', label: 'Promociones', icon: '🎁' },
-  { to: '/reports', label: 'Reportes', icon: '📊' },
+  { to: '/admin/dashboard', label: 'Dashboard', icon: '▤' },
+  { to: '/admin/appointments', label: 'Agenda', icon: '🗓' },
+  { to: '/admin/services', label: 'Servicios', icon: '✦' },
+  { to: '/admin/staff', label: 'Especialistas', icon: '👤' },
+  { to: '/admin/clients', label: 'Clientas', icon: '☺' },
+  { to: '/admin/promotions', label: 'Promociones', icon: '🎁' },
+  { to: '/admin/reports', label: 'Reportes', icon: '📊' },
 ];
 
+/** Menú del componente administrativo del sistema. */
 export const Sidebar: React.FC = () => {
   const user = useAuthStore(state => state.user);
 
