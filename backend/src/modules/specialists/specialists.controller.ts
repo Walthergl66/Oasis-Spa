@@ -7,10 +7,13 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
+import { ApiExcludeController } from '@nestjs/swagger';
 import { SpecialistsService } from './specialists.service';
 import { CreateSpecialistDto } from './dto/create-specialist.dto';
 import { UpdateSpecialistDto } from './dto/update-specialist.dto';
 
+/** Pendiente de implementar: oculto en la documentación. */
+@ApiExcludeController()
 @Controller('specialists')
 export class SpecialistsController {
   constructor(private readonly specialistsService: SpecialistsService) {}

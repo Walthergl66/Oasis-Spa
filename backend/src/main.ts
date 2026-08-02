@@ -2,11 +2,12 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { setupSwagger } from './config/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Las dos aplicaciones apuntan a http://localhost:3000/api.
+  // La aplicación apunta a http://localhost:3000/api.
   app.setGlobalPrefix('api');
 
   // Necesario para leer la cookie httpOnly con el refresh token.
@@ -30,9 +31,16 @@ async function bootstrap() {
     }),
   );
 
+  // Documentación interactiva; sólo si SWAGGER_ENABLED=true.
+  const rutaDocs = setupSwagger(app);
+
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
+
   console.log(`API escuchando en http://localhost:${port}/api`);
+  if (rutaDocs) {
+    console.log(`Documentación en http://localhost:${port}/${rutaDocs}`);
+  }
 }
 
 void bootstrap();

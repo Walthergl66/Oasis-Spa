@@ -9,6 +9,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Public } from '../auth/decorators/public.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/entities/user.entity';
@@ -23,6 +24,8 @@ import { ServicesService } from './services.service';
  * cuenta. Escribir exige rol de administración — la comprobación vive en el
  * backend, no en la interfaz.
  */
+@ApiTags('services')
+@ApiBearerAuth('bearer')
 @Controller('services')
 export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}

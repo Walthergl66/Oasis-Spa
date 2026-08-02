@@ -9,6 +9,7 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 // `import type` es obligatorio para los tipos que aparecen en firmas
 // decoradas: con `isolatedModules` + `emitDecoratorMetadata`, TypeScript no
@@ -34,6 +35,7 @@ interface SessionResponse {
   expiresIn: number;
 }
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -173,6 +175,7 @@ export class AuthController {
 
   /** Perfil de la sesión actual: lo usa el frontend al recargar la página. */
   @Get('me')
+  @ApiBearerAuth('bearer')
   me(@CurrentUser() user: User): User {
     return user;
   }
