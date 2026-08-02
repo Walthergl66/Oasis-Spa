@@ -20,6 +20,11 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import {
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  VerifyEmailDto,
+} from './dto/reset-password.dto';
 import type { AuthenticatedRequest } from './types/authenticated-request';
 
 /** Lo que viaja al navegador. El refresh token nunca aparece aquí. */
@@ -43,10 +48,10 @@ export class AuthController {
   /**
    * Fija el refresh token en una cookie httpOnly.
    *
-   * `sameSite: 'lax'` basta mientras la API y las aplicaciones compartan sitio
+   * `sameSite: 'lax'` basta mientras la API y la aplicación compartan sitio
    * (localhost en desarrollo, subdominios del mismo dominio en producción). Si
-   * algún día se despliegan en dominios distintos habrá que pasar a
-   * `sameSite: 'none'` con `secure: true`.
+   * se despliegan en dominios distintos habrá que pasar a `sameSite: 'none'`
+   * con `secure: true`.
    */
   private setRefreshCookie(response: Response, token: string): void {
     response.cookie(this.cookieName, token, {
@@ -71,13 +76,15 @@ export class AuthController {
     };
   }
 
+  /**
+   * POST /api/auth/register
+   *
+   * No devuelve sesión: la clienta debe confirmar su correo antes de entrar.
+   */
   @Public()
   @Post('register')
-  async register(
-    @Body() dto: RegisterDto,
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<SessionResponse> {
-    return this.toSession(await this.auth.register(dto), response);
+  register(@Body() dto: RegisterDto) {
+    return this.auth.register(dto);
   }
 
   @Public()
@@ -106,7 +113,6 @@ export class AuthController {
     try {
       return this.toSession(await this.auth.refresh(token), response);
     } catch (error) {
-      // Refresh inválido o caducado: la cookie ya no sirve de nada.
       this.clearRefreshCookie(response);
       throw error;
     }
@@ -126,6 +132,43 @@ export class AuthController {
 
     await this.auth.logout(accessToken);
     this.clearRefreshCookie(response);
+  }
+
+  /**
+   * POST /api/auth/forgot-password
+   *
+   * Responde 204 exista o no la cuenta: revelar cuáles están registradas
+   * permitiría enumerar la base de clientas.
+   */
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async forgotPassword(@Body() dto: ForgotPasswordDto): Promise<void> {
+    await this.auth.forgotPassword(dto.email);
+  }
+
+  /** POST /api/auth/reset-password — con el token del correo. */
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async resetPassword(@Body() dto: ResetPasswordDto): Promise<void> {
+    await this.auth.resetPassword(dto);
+  }
+
+  /** POST /api/auth/verify-email — confirma la cuenta recién registrada. */
+  @Public()
+  @Post('verify-email')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async verifyEmail(@Body() dto: VerifyEmailDto): Promise<void> {
+    await this.auth.verifyEmail(dto.token);
+  }
+
+  /** POST /api/auth/resend-verification — para quien no recibió el correo. */
+  @Public()
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async resendVerification(@Body() dto: ForgotPasswordDto): Promise<void> {
+    await this.auth.resendVerification(dto.email);
   }
 
   /** Perfil de la sesión actual: lo usa el frontend al recargar la página. */

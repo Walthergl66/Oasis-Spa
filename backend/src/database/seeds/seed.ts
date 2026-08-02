@@ -11,7 +11,7 @@
  *
  * Uso:  npm run seed
  */
-import * as bcrypt from 'bcryptjs';
+import { createClient } from '@supabase/supabase-js';
 import { AppDataSource } from '../data-source';
 import {
   Appointment,
@@ -45,6 +45,52 @@ const addDays = (date: Date, days: number): Date => {
   copy.setDate(copy.getDate() + days);
   return copy;
 };
+
+/**
+ * Cliente administrativo de Supabase. La clave service_role sólo se usa desde
+ * el servidor: crea las cuentas de demostración ya confirmadas, sin correo.
+ */
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321',
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
+  { auth: { autoRefreshToken: false, persistSession: false } },
+);
+
+/**
+ * Crea la cuenta en Supabase Auth y devuelve su id, que será la clave primaria
+ * del perfil. Si ya existe (al re-ejecutar el seed) se reutiliza: TRUNCATE
+ * borra los perfiles, pero no las cuentas de auth.users.
+ */
+async function ensureAuthUser(
+  email: string,
+  password: string,
+  name: string,
+): Promise<string> {
+  const { data, error } = await supabaseAdmin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { name },
+  });
+  if (data?.user) return data.user.id;
+
+  const yaExiste = /already|registered|exists/i.test(error?.message ?? '');
+  if (!yaExiste) {
+    throw new Error(`No se pudo crear la cuenta ${email}: ${error?.message}`);
+  }
+
+  const { data: list, error: listError } =
+    await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  if (listError) throw listError;
+
+  const encontrada = list.users.find(
+    (u) => u.email?.toLowerCase() === email.toLowerCase(),
+  );
+  if (!encontrada) throw new Error(`La cuenta ${email} existe pero no se encontró.`);
+
+  await supabaseAdmin.auth.admin.updateUserById(encontrada.id, { password });
+  return encontrada.id;
+}
 
 /** Construye una fecha con hora local a partir de un desfase en días. */
 const at = (offsetDays: number, time: string): Date => {
@@ -288,35 +334,43 @@ async function seed(): Promise<void> {
       },
     ];
 
-    const clientHash = await bcrypt.hash(CLIENT_PASSWORD, 12);
-    const adminHash = await bcrypt.hash(ADMIN_PASSWORD, 12);
+    // Cada perfil se enlaza a su cuenta de Supabase Auth, ya confirmada: el
+    // flujo real de confirmación por correo se prueba con altas nuevas.
+    const clients: User[] = [];
+    for (const data of userData) {
+      const authId = await ensureAuthUser(
+        data.email,
+        CLIENT_PASSWORD,
+        data.name,
+      );
+      clients.push(
+        await manager.save(
+          manager.create(User, {
+            id: authId,
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            role: UserRole.CLIENTE,
+            points: data.points,
+            level: data.level,
+            memberSince: data.memberSince,
+            favoriteServices: data.favorites.map(service),
+          }),
+        ),
+      );
+    }
 
-    const clients = await manager.save(
-      userData.map((data) =>
-        manager.create(User, {
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-          passwordHash: clientHash,
-          // Las cuentas de demostración se dan por verificadas: el flujo de
-          // confirmación por correo se prueba con altas reales.
-          emailVerified: true,
-          role: UserRole.CLIENTE,
-          points: data.points,
-          level: data.level,
-          memberSince: data.memberSince,
-          favoriteServices: data.favorites.map(service),
-        }),
-      ),
+    const adminId = await ensureAuthUser(
+      'admin@oasisspa.ec',
+      ADMIN_PASSWORD,
+      'Administración Spa',
     );
-
     await manager.save(
       manager.create(User, {
+        id: adminId,
         name: 'Administración Spa',
         email: 'admin@oasisspa.ec',
         phone: '052 620 118',
-        passwordHash: adminHash,
-        emailVerified: true,
         role: UserRole.ADMIN,
         memberSince: '2024-01-01',
       }),

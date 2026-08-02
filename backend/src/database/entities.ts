@@ -5,7 +5,6 @@
  * migraciones, para que ambos vean exactamente el mismo modelo.
  */
 import { Appointment } from '../modules/appointments/entities/appointment.entity';
-import { RefreshToken } from '../modules/auth/entities/refresh-token.entity';
 import { Category } from '../modules/categories/entities/category.entity';
 import { Notification } from '../modules/notifications/entities/notification.entity';
 import { Promotion } from '../modules/promotions/entities/promotion.entity';
@@ -23,12 +22,10 @@ export const ENTITIES = [
   Promotion,
   Review,
   Notification,
-  RefreshToken,
 ];
 
 export {
   Appointment,
-  RefreshToken,
   Category,
   Notification,
   Promotion,

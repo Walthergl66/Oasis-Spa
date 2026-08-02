@@ -5,25 +5,23 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../../users/users.service';
-import type { AccessTokenPayload } from '../auth.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { JwtVerifierService } from '../jwt-verifier.service';
 import type { AuthenticatedRequest } from '../types/authenticated-request';
 
 /**
- * Valida el access token y carga el perfil correspondiente.
+ * Valida el access token de Supabase Auth y carga el perfil de dominio.
  *
- * El ROL no viaja en el token, se lee de la tabla `users` en cada petición. Es
- * deliberado: si la administración revoca permisos a alguien, el cambio surte
- * efecto en la siguiente llamada y no cuando caduque su token. El coste es una
- * consulta por id —indexada— a cambio de poder revocar de inmediato.
+ * El ROL nunca se lee del token, sino de la tabla `users`. Es deliberado: si la
+ * administración revoca permisos a alguien, el cambio surte efecto en la
+ * siguiente petición y no cuando caduque su token una hora después.
  */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly jwt: JwtService,
+    private readonly verifier: JwtVerifierService,
     private readonly users: UsersService,
   ) {}
 
@@ -38,19 +36,12 @@ export class JwtAuthGuard implements CanActivate {
     const token = this.extractToken(request);
     if (!token) throw new UnauthorizedException('Falta el token de acceso.');
 
-    let payload: AccessTokenPayload;
-    try {
-      payload = await this.jwt.verifyAsync<AccessTokenPayload>(token);
-    } catch (error) {
-      const expirado =
-        error instanceof Error && error.name === 'TokenExpiredError';
-      throw new UnauthorizedException(
-        expirado ? 'La sesión expiró.' : 'Token de acceso no válido.',
-      );
-    }
+    const payload = await this.verifier.verify(token);
 
     const user = await this.users.findById(payload.sub);
-    if (!user) throw new UnauthorizedException('La cuenta no existe.');
+    if (!user) {
+      throw new UnauthorizedException('La cuenta no tiene un perfil asociado.');
+    }
     if (!user.active) {
       throw new UnauthorizedException('Esta cuenta está desactivada.');
     }
