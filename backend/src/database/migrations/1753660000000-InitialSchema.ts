@@ -321,6 +321,39 @@ export class InitialSchema1753660000000 implements MigrationInterface {
     await queryRunner.query(
       `CREATE INDEX "IDX_notifications_user_read" ON "notifications" ("user_id", "read")`,
     );
+
+    // ---------- Row Level Security ----------
+    //
+    // Supabase publica automáticamente el esquema `public` como API REST
+    // (PostgREST). Sin RLS, cualquiera con la clave `anon` —que es pública y
+    // viaja en el frontend— podría leer y escribir estas tablas directamente,
+    // saltándose por completo la API y sus guards de rol.
+    //
+    // Se activa RLS SIN definir ninguna política: el resultado es denegar todo
+    // acceso a los roles `anon` y `authenticated`, es decir, a PostgREST.
+    //
+    // La API no se ve afectada: TypeORM se conecta como `postgres`, dueño de
+    // las tablas, y el dueño no queda sujeto a RLS salvo que se use FORCE. El
+    // control de acceso sigue viviendo donde lo diseñamos —los guards de
+    // NestJS— y esta capa sólo cierra la puerta trasera.
+    const tablas = [
+      'categories',
+      'users',
+      'services',
+      'specialists',
+      'specialist_categories',
+      'user_favorite_services',
+      'appointments',
+      'reviews',
+      'promotions',
+      'promotion_services',
+      'notifications',
+    ];
+    for (const tabla of tablas) {
+      await queryRunner.query(
+        `ALTER TABLE "${tabla}" ENABLE ROW LEVEL SECURITY`,
+      );
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

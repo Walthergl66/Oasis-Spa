@@ -14,15 +14,23 @@ Stack: **NestJS + TypeORM + PostgreSQL (Supabase)**.
 
 ## Autenticación
 
-La identidad la gestiona **Supabase Auth**; NestJS actúa de intermediario para
-que el refresh token viaje en una **cookie httpOnly** y no en `localStorage`.
+La identidad la gestiona **Supabase Auth (GoTrue)**: contraseñas, confirmación
+de correo y recuperación. `public.users` es sólo el perfil de dominio, con el
+mismo `id` que `auth.users` y `ON DELETE CASCADE`.
+
+NestJS actúa de intermediario para que el refresh token viaje en una **cookie
+httpOnly** y no en `localStorage`, que sería accesible a cualquier script.
 
 | Método | Ruta | Acceso |
 | --- | --- | --- |
-| POST | `/api/auth/register` | público (siempre rol `cliente`) |
-| POST | `/api/auth/login` | público |
-| POST | `/api/auth/refresh` | público (usa la cookie) |
+| POST | `/api/auth/register` | público — envía correo de confirmación, no da sesión |
+| POST | `/api/auth/verify-email` | público — confirma con el token del correo |
+| POST | `/api/auth/resend-verification` | público |
+| POST | `/api/auth/login` | público — exige correo confirmado |
+| POST | `/api/auth/refresh` | público — usa la cookie |
 | POST | `/api/auth/logout` | público |
+| POST | `/api/auth/forgot-password` | público — responde igual exista o no la cuenta |
+| POST | `/api/auth/reset-password` | público — token de un solo uso |
 | GET | `/api/auth/me` | sesión válida |
 
 El access token se verifica **localmente contra el JWKS de Supabase** (ES256),
@@ -32,20 +40,55 @@ tabla `users`, para que revocar permisos surta efecto de inmediato.
 Los guards son **globales**: todo endpoint exige sesión salvo que se marque con
 `@Public()`, y `@Roles(...)` restringe por rol.
 
-## Puesta en marcha
+En desarrollo, los correos los captura **Mailpit** en http://127.0.0.1:54324.
+
+## Puesta en marcha (desarrollo local)
 
 ```bash
 npm install
+npx supabase start          # desde la raíz del repositorio
+cp .env.example .env        # los valores locales ya vienen indicados
+npm run migration:run       # crea el esquema
+npm run seed                # datos de demostración (SÓLO local)
+npm run start:dev           # API en http://localhost:3000/api
 ```
 
-Copia `.env.example` a `.env` y completa los datos de conexión (en Supabase:
-*Project Settings → Database → Connection string*).
+Los correos de confirmación y recuperación los captura **Mailpit** en
+http://127.0.0.1:54324.
+
+## Puesta en marcha (Supabase en la nube)
+
+1. **Conexión**: en el panel, *Project Settings → Database → Connection string*,
+   pestaña **Session pooler**. Copia esos valores al bloque `DB_*` de `.env`
+   con `DB_SSL=true`. No uses el *Transaction pooler* (puerto 6543): no admite
+   sentencias preparadas y TypeORM las necesita.
+
+2. **Claves de Auth**: *Project Settings → API* → `URL`, `anon` y
+   `service_role`. La `service_role` nunca debe salir del servidor.
+
+3. **Configuración de Auth**: en *Authentication → URL Configuration*, fija el
+   `Site URL` y añade a *Redirect URLs* `<APP_URL>/verificar-correo` y
+   `<APP_URL>/restablecer-clave`. Sin esto, los enlaces de los correos no
+   vuelven a la aplicación.
+
+4. **Confirmación de correo**: en *Authentication → Sign In / Providers →
+   Email*, activa *Confirm email*.
+
+5. **SMTP propio**: el servicio de correo incluido está limitado a unos pocos
+   envíos por hora y no sirve para producción. Configura tu SMTP en
+   *Authentication → Emails → SMTP Settings*.
+
+6. **Esquema y catálogo**:
 
 ```bash
-npm run migration:run   # crea el esquema
-npm run seed            # carga datos de demostración
-npm run start:dev       # API en http://localhost:3000/api
+npm run migration:run
+ADMIN_EMAIL=... ADMIN_PASSWORD=... npm run seed:catalogo
 ```
+
+`seed:catalogo` inserta sólo lo que falta (categorías, servicios,
+especialistas, promociones) y **no borra nada**. El `seed` de demostración se
+niega a ejecutarse contra una base que no sea local.
+
 
 ## Arquitectura
 

@@ -100,7 +100,52 @@ const at = (offsetDays: number, time: string): Date => {
   return date;
 };
 
+/** Una base local es la que corre en esta máquina, no un proyecto en la nube. */
+function esBaseLocal(): boolean {
+  const host = process.env.DB_HOST ?? 'localhost';
+  return ['localhost', '127.0.0.1', '::1'].includes(host);
+}
+
+/**
+ * Salvaguarda contra ejecutar el seed de demostración en producción.
+ *
+ * El modo demo BORRA todas las tablas y crea siete cuentas con contraseñas
+ * públicas. Ejecutarlo por error contra el proyecto en la nube destruiría los
+ * datos reales del spa, así que se exige confirmación explícita.
+ */
+function comprobarDestino(): void {
+  if (esBaseLocal()) return;
+
+  if (process.env.SEED_ALLOW_REMOTE !== 'true') {
+    console.error(
+      [
+        '',
+        '  ABORTADO: la base de datos NO es local.',
+        `  Host: ${process.env.DB_HOST}`,
+        '',
+        '  El seed de demostración borra todas las tablas y crea cuentas con',
+        '  contraseñas públicas. Para cargar datos en un proyecto real usa:',
+        '',
+        '      npm run seed:catalogo',
+        '',
+        '  que sólo inserta catálogo, sin borrar nada ni crear cuentas de prueba.',
+        '',
+        '  Si de verdad quieres el seed completo aquí, ejecuta con',
+        '  SEED_ALLOW_REMOTE=true.',
+        '',
+      ].join('\n'),
+    );
+    process.exit(1);
+  }
+
+  console.warn(
+    `ATENCIÓN: seed de demostración sobre una base remota (${process.env.DB_HOST}).`,
+  );
+}
+
 async function seed(): Promise<void> {
+  comprobarDestino();
+
   const dataSource = await AppDataSource.initialize();
   console.log('Conectado a la base de datos. Cargando datos iniciales…');
 

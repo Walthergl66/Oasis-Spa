@@ -233,7 +233,9 @@ export class AuthService {
     }
 
     // Cambiar la contraseña invalida el resto de sesiones abiertas.
-    await this.supabaseAdmin.auth.admin.signOut(data.session?.access_token ?? '');
+    await this.supabaseAdmin.auth.admin.signOut(
+      data.session?.access_token ?? '',
+    );
   }
 
   /** Confirma el correo con el token del enlace enviado al registrarse. */
