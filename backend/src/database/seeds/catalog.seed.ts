@@ -47,65 +47,126 @@ const CATEGORIAS = [
 
 const SERVICIOS = [
   {
-    name: 'Manicura Glossy', categoria: 'Uñas', price: 28, durationMin: 60,
-    description: 'Acabado glossy de larga duración con base nutritiva y detalles a elección. Incluye limado y cutícula.',
-    popular: true, imageUrl: '/img/manicura.jpg',
+    name: 'Manicura Glossy',
+    categoria: 'Uñas',
+    price: 28,
+    durationMin: 60,
+    description:
+      'Acabado glossy de larga duración con base nutritiva y detalles a elección. Incluye limado y cutícula.',
+    popular: true,
+    imageUrl: '/img/manicura.jpg',
   },
   {
-    name: 'Masaje Relajante', categoria: 'Masaje', price: 55, durationMin: 90,
-    description: 'Masaje de cuerpo completo con aceites esenciales de lavanda y jojoba. Alivio de tensiones musculares.',
-    popular: true, imageUrl: '/img/masaje.jpg',
+    name: 'Masaje Relajante',
+    categoria: 'Masaje',
+    price: 55,
+    durationMin: 90,
+    description:
+      'Masaje de cuerpo completo con aceites esenciales de lavanda y jojoba. Alivio de tensiones musculares.',
+    popular: true,
+    imageUrl: '/img/masaje.jpg',
   },
   {
-    name: 'Diseño de Pestañas', categoria: 'Pestañas', price: 65, durationMin: 120,
-    description: 'Extensión de pestañas pelo a pelo con fibra de seda. Efecto natural o volumen según preferencia.',
-    popular: false, imageUrl: '/img/pestanas.jpg',
+    name: 'Diseño de Pestañas',
+    categoria: 'Pestañas',
+    price: 65,
+    durationMin: 120,
+    description:
+      'Extensión de pestañas pelo a pelo con fibra de seda. Efecto natural o volumen según preferencia.',
+    popular: false,
+    imageUrl: '/img/pestanas.jpg',
   },
   {
-    name: 'Tratamiento Capilar', categoria: 'Cabello', price: 45, durationMin: 75,
-    description: 'Hidratación profunda con keratina vegetal, sellado de puntas y brillo intenso.',
-    popular: false, imageUrl: '/img/cabello.jpg',
+    name: 'Tratamiento Capilar',
+    categoria: 'Cabello',
+    price: 45,
+    durationMin: 75,
+    description:
+      'Hidratación profunda con keratina vegetal, sellado de puntas y brillo intenso.',
+    popular: false,
+    imageUrl: '/img/cabello.jpg',
   },
   {
-    name: 'Facial Express', categoria: 'Facial', price: 38, durationMin: 55,
-    description: 'Limpieza profunda, exfoliación suave e hidratación intensiva. Piel luminosa en menos de una hora.',
-    popular: true, imageUrl: '/img/facial.jpg',
+    name: 'Facial Express',
+    categoria: 'Facial',
+    price: 38,
+    durationMin: 55,
+    description:
+      'Limpieza profunda, exfoliación suave e hidratación intensiva. Piel luminosa en menos de una hora.',
+    popular: true,
+    imageUrl: '/img/facial.jpg',
   },
   {
-    name: 'Ritual Spa Completo', categoria: 'Spa', price: 93, durationMin: 180,
-    description: 'Experiencia integral: envoltura corporal y facial hidratante. El lujo de un día completo.',
-    popular: false, imageUrl: '/img/spa.jpg',
+    name: 'Ritual Spa Completo',
+    categoria: 'Spa',
+    price: 93,
+    durationMin: 180,
+    description:
+      'Experiencia integral: envoltura corporal y facial hidratante. El lujo de un día completo.',
+    popular: false,
+    imageUrl: '/img/spa.jpg',
   },
 ];
 
 const ESPECIALISTAS = [
-  { name: 'Tatiana Aguirre', role: 'Nail art & manicura', categorias: ['Uñas', 'Pestañas'] },
-  { name: 'Valeria Mora', role: 'Uñas & pestañas', categorias: ['Uñas', 'Pestañas', 'Facial'] },
-  { name: 'Gabriela Wilson', role: 'Masajes & spa', categorias: ['Masaje', 'Spa'] },
-  { name: 'Daniela Cedeño', role: 'Facial & cuidado de piel', categorias: ['Facial', 'Spa'] },
+  {
+    name: 'Tatiana Aguirre',
+    role: 'Nail art & manicura',
+    categorias: ['Uñas', 'Pestañas'],
+  },
+  {
+    name: 'Valeria Mora',
+    role: 'Uñas & pestañas',
+    categorias: ['Uñas', 'Pestañas', 'Facial'],
+  },
+  {
+    name: 'Gabriela Wilson',
+    role: 'Masajes & spa',
+    categorias: ['Masaje', 'Spa'],
+  },
+  {
+    name: 'Daniela Cedeño',
+    role: 'Facial & cuidado de piel',
+    categorias: ['Facial', 'Spa'],
+  },
   { name: 'Karla Bravo', role: 'Estilismo & cabello', categorias: ['Cabello'] },
 ];
 
 const PROMOCIONES = [
   {
     title: 'Combo Relax Total',
-    description: 'Masaje Relajante + Facial Express con 30% de descuento. Tu momento de calma completa.',
-    badge: '-30%', color: PromotionColor.TERRACOTA, validText: 'Hasta fin de mes',
-    priceBefore: 93, priceNow: 65, imageUrl: '/img/masaje.jpg',
+    description:
+      'Masaje Relajante + Facial Express con 30% de descuento. Tu momento de calma completa.',
+    badge: '-30%',
+    color: PromotionColor.TERRACOTA,
+    validText: 'Hasta fin de mes',
+    priceBefore: 93,
+    priceNow: 65,
+    imageUrl: '/img/masaje.jpg',
     servicios: ['Masaje Relajante', 'Facial Express'],
   },
   {
     title: 'Martes de Uñas',
-    description: 'Todas las manicuras a mitad de precio los días martes. Reserva con anticipación.',
-    badge: '-50%', color: PromotionColor.ROSA, validText: 'Todos los martes',
-    priceBefore: 28, priceNow: 14, imageUrl: '/img/manicura.jpg',
+    description:
+      'Todas las manicuras a mitad de precio los días martes. Reserva con anticipación.',
+    badge: '-50%',
+    color: PromotionColor.ROSA,
+    validText: 'Todos los martes',
+    priceBefore: 28,
+    priceNow: 14,
+    imageUrl: '/img/manicura.jpg',
     servicios: ['Manicura Glossy'],
   },
   {
     title: 'Primera Visita',
-    description: 'Bienvenida especial: 20% de descuento en tu primer servicio con nosotras.',
-    badge: '-20%', color: PromotionColor.VERDE, validText: 'Clientes nuevas',
-    priceBefore: null, priceNow: null, imageUrl: '/img/facial.jpg',
+    description:
+      'Bienvenida especial: 20% de descuento en tu primer servicio con nosotras.',
+    badge: '-20%',
+    color: PromotionColor.VERDE,
+    validText: 'Clientes nuevas',
+    priceBefore: null,
+    priceNow: null,
+    imageUrl: '/img/facial.jpg',
     servicios: ['Facial Express'],
   },
 ];
@@ -140,7 +201,9 @@ async function crearAdministracion(manager: EntityManager): Promise<void> {
     user_metadata: { name: 'Administración Oasis Spa' },
   });
   if (error || !data.user) {
-    throw new Error(`No se pudo crear la cuenta de administración: ${error?.message}`);
+    throw new Error(
+      `No se pudo crear la cuenta de administración: ${error?.message}`,
+    );
   }
 
   await manager.save(
@@ -163,7 +226,9 @@ async function cargarCatalogo(): Promise<void> {
     // ---------- Categorías ----------
     let nuevasCategorias = 0;
     for (const data of CATEGORIAS) {
-      const existe = await manager.findOne(Category, { where: { name: data.name } });
+      const existe = await manager.findOne(Category, {
+        where: { name: data.name },
+      });
       if (existe) continue;
       await manager.save(manager.create(Category, data));
       nuevasCategorias += 1;
@@ -171,12 +236,16 @@ async function cargarCatalogo(): Promise<void> {
     const categorias = await manager.find(Category);
     const categoria = (name: string): Category =>
       categorias.find((c) => c.name === name)!;
-    console.log(`  categorías: ${nuevasCategorias} nuevas de ${CATEGORIAS.length}`);
+    console.log(
+      `  categorías: ${nuevasCategorias} nuevas de ${CATEGORIAS.length}`,
+    );
 
     // ---------- Servicios ----------
     let nuevosServicios = 0;
     for (const data of SERVICIOS) {
-      const existe = await manager.findOne(Service, { where: { name: data.name } });
+      const existe = await manager.findOne(Service, {
+        where: { name: data.name },
+      });
       if (existe) continue;
       await manager.save(
         manager.create(Service, {
@@ -192,13 +261,18 @@ async function cargarCatalogo(): Promise<void> {
       nuevosServicios += 1;
     }
     const servicios = await manager.find(Service);
-    const servicio = (name: string): Service => servicios.find((s) => s.name === name)!;
-    console.log(`  servicios: ${nuevosServicios} nuevos de ${SERVICIOS.length}`);
+    const servicio = (name: string): Service =>
+      servicios.find((s) => s.name === name)!;
+    console.log(
+      `  servicios: ${nuevosServicios} nuevos de ${SERVICIOS.length}`,
+    );
 
     // ---------- Especialistas ----------
     let nuevasEspecialistas = 0;
     for (const data of ESPECIALISTAS) {
-      const existe = await manager.findOne(Specialist, { where: { name: data.name } });
+      const existe = await manager.findOne(Specialist, {
+        where: { name: data.name },
+      });
       if (existe) continue;
       await manager.save(
         manager.create(Specialist, {
@@ -218,7 +292,9 @@ async function cargarCatalogo(): Promise<void> {
     // ---------- Promociones ----------
     let nuevasPromociones = 0;
     for (const data of PROMOCIONES) {
-      const existe = await manager.findOne(Promotion, { where: { title: data.title } });
+      const existe = await manager.findOne(Promotion, {
+        where: { title: data.title },
+      });
       if (existe) continue;
       await manager.save(
         manager.create(Promotion, {
@@ -235,7 +311,9 @@ async function cargarCatalogo(): Promise<void> {
       );
       nuevasPromociones += 1;
     }
-    console.log(`  promociones: ${nuevasPromociones} nuevas de ${PROMOCIONES.length}`);
+    console.log(
+      `  promociones: ${nuevasPromociones} nuevas de ${PROMOCIONES.length}`,
+    );
 
     // ---------- Administración ----------
     await crearAdministracion(manager);

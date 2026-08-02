@@ -86,7 +86,8 @@ async function ensureAuthUser(
   const encontrada = list.users.find(
     (u) => u.email?.toLowerCase() === email.toLowerCase(),
   );
-  if (!encontrada) throw new Error(`La cuenta ${email} existe pero no se encontró.`);
+  if (!encontrada)
+    throw new Error(`La cuenta ${email} existe pero no se encontró.`);
 
   await supabaseAdmin.auth.admin.updateUserById(encontrada.id, { password });
   return encontrada.id;

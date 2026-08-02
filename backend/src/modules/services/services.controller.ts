@@ -25,7 +25,6 @@ import { ServicesService } from './services.service';
  * backend, no en la interfaz.
  */
 @ApiTags('services')
-@ApiBearerAuth('bearer')
 @Controller('services')
 export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
@@ -50,6 +49,7 @@ export class ServicesController {
    * que `:id` para que el enrutador no lo interprete como un identificador.
    */
   @Get('manage')
+  @ApiBearerAuth('bearer')
   @Roles(UserRole.ADMIN)
   findAllForAdmin() {
     return this.servicesService.findAll({ includeInactive: true });
@@ -62,12 +62,14 @@ export class ServicesController {
   }
 
   @Post()
+  @ApiBearerAuth('bearer')
   @Roles(UserRole.ADMIN)
   create(@Body() dto: CreateServiceDto) {
     return this.servicesService.create(dto);
   }
 
   @Patch(':id')
+  @ApiBearerAuth('bearer')
   @Roles(UserRole.ADMIN)
   update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -77,6 +79,7 @@ export class ServicesController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth('bearer')
   @Roles(UserRole.ADMIN)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.servicesService.remove(id);
