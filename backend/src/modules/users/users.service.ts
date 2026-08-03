@@ -46,6 +46,25 @@ export class UsersService {
     });
   }
 
+  /**
+   * Acredita puntos de fidelidad y recalcula el nivel.
+   *
+   * Un punto por dólar facturado. El nivel se deriva de los puntos, así que se
+   * recalcula aquí y no se deja a merced de quien actualice el perfil.
+   */
+  async addPoints(userId: string, importe: number): Promise<number> {
+    const user = await this.getById(userId);
+    user.points += Math.round(importe);
+    user.level =
+      user.points >= 600
+        ? LoyaltyLevel.ORO
+        : user.points >= 300
+          ? LoyaltyLevel.AMBAR
+          : LoyaltyLevel.BRONCE;
+    await this.repository.save(user);
+    return user.points;
+  }
+
   /** Crea el perfil asociado a una cuenta ya existente en Supabase Auth. */
   createProfile(input: CreateProfileInput): Promise<User> {
     const user = this.repository.create({

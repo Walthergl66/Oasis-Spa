@@ -9,7 +9,9 @@ Stack: **NestJS + TypeORM + PostgreSQL (Supabase)**.
 | --- | --- | --- |
 | 1 | Entidades y esquema de base de datos | ✅ completada |
 | 2 | Endpoints REST — módulo `auth` | ✅ completado |
-| 2 | Endpoints REST — `services`, `appointments`, `reports`, recordatorios | pendiente |
+| 2 | Endpoints REST — `services`, `categories`, `specialists` | ✅ completado |
+| 2 | Endpoints REST — `appointments` (disponibilidad y reservas) | ✅ completado |
+| 2 | Endpoints REST — `reports`, `reviews`, recordatorios por correo | pendiente |
 | 3 | `/api/luna/chat` con ejecución de funciones (tool use) | pendiente |
 
 ## Autenticación
@@ -41,6 +43,35 @@ Los guards son **globales**: todo endpoint exige sesión salvo que se marque con
 `@Public()`, y `@Roles(...)` restringe por rol.
 
 En desarrollo, los correos los captura **Mailpit** en http://127.0.0.1:54324.
+
+## Citas y disponibilidad
+
+El módulo `appointments` concentra la lógica del negocio:
+
+| Método | Ruta | Acceso |
+| --- | --- | --- |
+| GET | `/api/appointments/availability` | público — horarios libres de un servicio |
+| GET | `/api/appointments/mine` | sesión — `?scope=upcoming|history` |
+| GET | `/api/appointments/agenda` | admin / especialista |
+| POST | `/api/appointments` | sesión |
+| PATCH | `/api/appointments/:id/reschedule` | dueña de la cita o personal |
+| PATCH | `/api/appointments/:id/cancel` | dueña de la cita o personal |
+| PATCH | `/api/appointments/:id/status` | admin / especialista |
+
+**Disponibilidad.** Franjas de 30 minutos entre la apertura y el cierre, según
+el día de la semana (lun-sáb 09:00-18:00, dom 10:00-14:00). Una franja se
+ofrece si alguna especialista habilitada en la categoría del servicio tiene el
+bloque completo libre. Los horarios ya pasados no se muestran.
+
+**Concurrencia.** El servicio valida disponibilidad antes de insertar, pero no
+confía sólo en eso: entre la comprobación y el INSERT puede colarse otra
+reserva. Esa carrera la corta la restricción `appointments_no_overlap` de la
+base y se traduce a un 409. Verificado con 5 peticiones simultáneas a la misma
+franja: una tuvo éxito, cuatro recibieron 409, ninguna 500.
+
+**Zona horaria.** Fecha y hora viajan separadas y en horario del spa; el
+servidor las combina con desfase fijo `-05:00`, así que el resultado no depende
+de dónde se ejecute la API.
 
 ## Puesta en marcha (desarrollo local)
 

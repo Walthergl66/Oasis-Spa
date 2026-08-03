@@ -33,7 +33,9 @@ export class NotificationsService {
    * quedar el aviso diciendo que se creó.
    */
   async emit(aviso: EmitirAviso, manager?: EntityManager): Promise<void> {
-    const repo = manager ? manager.getRepository(Notification) : this.repository;
+    const repo = manager
+      ? manager.getRepository(Notification)
+      : this.repository;
     await repo.save(repo.create(aviso));
   }
 
