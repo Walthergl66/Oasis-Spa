@@ -1,48 +1,33 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
-import { ApiExcludeController } from '@nestjs/swagger';
+import { Controller, Get } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Public } from '../auth/decorators/public.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../users/entities/user.entity';
 import { SpecialistsService } from './specialists.service';
-import { CreateSpecialistDto } from './dto/create-specialist.dto';
-import { UpdateSpecialistDto } from './dto/update-specialist.dto';
 
-/** Pendiente de implementar: oculto en la documentación. */
-@ApiExcludeController()
+/**
+ * Equipo del spa.
+ *
+ * La lista es pública: la clienta ve quién la atenderá antes de reservar. La
+ * gestión (altas, bajas, cambios de estado) llega con el panel administrativo.
+ */
+@ApiTags('specialists')
 @Controller('specialists')
 export class SpecialistsController {
   constructor(private readonly specialistsService: SpecialistsService) {}
 
-  @Post()
-  create(@Body() createSpecialistDto: CreateSpecialistDto) {
-    return this.specialistsService.create(createSpecialistDto);
-  }
-
+  /** GET /api/specialists — equipo activo. */
+  @Public()
   @Get()
   findAll() {
     return this.specialistsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.specialistsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateSpecialistDto: UpdateSpecialistDto,
-  ) {
-    return this.specialistsService.update(+id, updateSpecialistDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.specialistsService.remove(+id);
+  /** GET /api/specialists/manage — incluye a las dadas de baja. */
+  @Get('manage')
+  @ApiBearerAuth('bearer')
+  @Roles(UserRole.ADMIN)
+  findAllForAdmin() {
+    return this.specialistsService.findAll(true);
   }
 }

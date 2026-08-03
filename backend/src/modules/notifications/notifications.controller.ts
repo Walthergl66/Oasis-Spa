@@ -1,48 +1,32 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
-import { ApiExcludeController } from '@nestjs/swagger';
+import { Controller, Get, HttpCode, HttpStatus, Patch } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { User } from '../users/entities/user.entity';
 import { NotificationsService } from './notifications.service';
-import { CreateNotificationDto } from './dto/create-notification.dto';
-import { UpdateNotificationDto } from './dto/update-notification.dto';
 
-/** Pendiente de implementar: oculto en la documentación. */
-@ApiExcludeController()
+/**
+ * Avisos de la usuaria autenticada.
+ *
+ * No hay endpoint para consultar los avisos de otra persona: el destinatario
+ * sale siempre del token, nunca de un parámetro. Así no existe forma de pedir
+ * notificaciones ajenas cambiando un id en la URL.
+ */
+@ApiTags('notifications')
+@ApiBearerAuth('bearer')
 @Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
-  @Post()
-  create(@Body() createNotificationDto: CreateNotificationDto) {
-    return this.notificationsService.create(createNotificationDto);
-  }
-
+  /** GET /api/notifications — los avisos de quien hace la petición. */
   @Get()
-  findAll() {
-    return this.notificationsService.findAll();
+  findMine(@CurrentUser() user: User) {
+    return this.notificationsService.findForUser(user.id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.notificationsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateNotificationDto: UpdateNotificationDto,
-  ) {
-    return this.notificationsService.update(+id, updateNotificationDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.notificationsService.remove(+id);
+  /** PATCH /api/notifications/read-all — marca todos como leídos. */
+  @Patch('read-all')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async markAllRead(@CurrentUser() user: User): Promise<void> {
+    await this.notificationsService.markAllRead(user.id);
   }
 }
