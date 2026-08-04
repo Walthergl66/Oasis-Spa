@@ -2,6 +2,7 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/entities/user.entity';
+import { SpecialistLoadQueryDto } from './dto/specialist-load-query.dto';
 import { ReportsService } from './reports.service';
 
 /**
@@ -26,9 +27,10 @@ export class ReportsController {
   /** GET /api/reports/specialists?date= — carga del equipo ese día. */
   @Get('specialists')
   @ApiQuery({ name: 'date', required: false, example: '2026-08-04' })
-  getSpecialistLoad(@Query('date') date?: string) {
+  getSpecialistLoad(@Query() query: SpecialistLoadQueryDto) {
     const fecha =
-      date ?? new Date().toLocaleDateString('en-CA', { timeZone: 'America/Guayaquil' });
+      query.date ??
+      new Date().toLocaleDateString('en-CA', { timeZone: 'America/Guayaquil' });
     return this.reports.getSpecialistLoad(fecha);
   }
 }
