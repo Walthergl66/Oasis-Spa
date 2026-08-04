@@ -47,6 +47,25 @@ export class UsersService {
   }
 
   /**
+   * Clientas registradas en el mes en curso.
+   *
+   * El mes se calcula en la zona del spa: una clienta que se registra a las
+   * 20:00 del día 31 pertenece a ese mes, no al siguiente por efecto de UTC.
+   */
+  async countNewClientsThisMonth(): Promise<number> {
+    const fila = await this.repository
+      .createQueryBuilder('user')
+      .select('COUNT(*)::int', 'total')
+      .where('user.role = :rol', { rol: UserRole.CLIENTE })
+      .andWhere(
+        `date_trunc('month', user.created_at AT TIME ZONE 'America/Guayaquil')
+         = date_trunc('month', now() AT TIME ZONE 'America/Guayaquil')`,
+      )
+      .getRawOne<{ total: number }>();
+    return Number(fila?.total ?? 0);
+  }
+
+  /**
    * Acredita puntos de fidelidad y recalcula el nivel.
    *
    * Un punto por dólar facturado. El nivel se deriva de los puntos, así que se

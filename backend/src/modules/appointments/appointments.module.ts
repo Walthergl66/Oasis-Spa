@@ -6,6 +6,7 @@ import { SpecialistsModule } from '../specialists/specialists.module';
 import { UsersModule } from '../users/users.module';
 import { AppointmentsController } from './appointments.controller';
 import { AppointmentsService } from './appointments.service';
+import { AppointmentsStatsService } from './appointments-stats.service';
 import { Appointment } from './entities/appointment.entity';
 
 /**
@@ -30,7 +31,7 @@ import { Appointment } from './entities/appointment.entity';
     NotificationsModule,
   ],
   controllers: [AppointmentsController],
-  providers: [AppointmentsService],
-  exports: [AppointmentsService],
+  providers: [AppointmentsService, AppointmentsStatsService],
+  exports: [AppointmentsService, AppointmentsStatsService],
 })
 export class AppointmentsModule {}
