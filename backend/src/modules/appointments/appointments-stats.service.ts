@@ -23,7 +23,9 @@ export class AppointmentsStatsService {
   private static readonly TZ = 'America/Guayaquil';
 
   /** Citas e ingresos de un día concreto (sin contar las canceladas). */
-  async resumenDelDia(offsetDias = 0): Promise<{ citas: number; ingresos: number }> {
+  async resumenDelDia(
+    offsetDias = 0,
+  ): Promise<{ citas: number; ingresos: number }> {
     const fila = await this.repository
       .createQueryBuilder('cita')
       .select('COUNT(*)', 'citas')
@@ -147,7 +149,9 @@ export class AppointmentsStatsService {
       `,
       [AppointmentsStatsService.TZ, offsetMeses],
     );
-    const fila = (filas as { citas: number; ingresos: number; canceladas: number }[])[0];
+    const fila = (
+      filas as { citas: number; ingresos: number; canceladas: number }[]
+    )[0];
     return fila ?? { citas: 0, ingresos: 0, canceladas: 0 };
   }
 

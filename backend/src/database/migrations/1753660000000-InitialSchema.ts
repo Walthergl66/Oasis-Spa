@@ -362,21 +362,35 @@ export class InitialSchema1753660000000 implements MigrationInterface {
       `DROP FUNCTION IF EXISTS "oasis"."appointments_set_ends_at"()`,
     );
     await queryRunner.query(`DROP TABLE IF EXISTS "oasis"."notifications"`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "oasis"."promotion_services"`);
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS "oasis"."promotion_services"`,
+    );
     await queryRunner.query(`DROP TABLE IF EXISTS "oasis"."promotions"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "oasis"."reviews"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "oasis"."appointments"`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "oasis"."user_favorite_services"`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "oasis"."specialist_categories"`);
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS "oasis"."user_favorite_services"`,
+    );
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS "oasis"."specialist_categories"`,
+    );
     await queryRunner.query(`DROP TABLE IF EXISTS "oasis"."specialists"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "oasis"."services"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "oasis"."users"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "oasis"."categories"`);
 
-    await queryRunner.query(`DROP TYPE IF EXISTS "oasis"."notifications_type_enum"`);
-    await queryRunner.query(`DROP TYPE IF EXISTS "oasis"."promotions_color_enum"`);
-    await queryRunner.query(`DROP TYPE IF EXISTS "oasis"."appointments_status_enum"`);
-    await queryRunner.query(`DROP TYPE IF EXISTS "oasis"."specialists_status_enum"`);
+    await queryRunner.query(
+      `DROP TYPE IF EXISTS "oasis"."notifications_type_enum"`,
+    );
+    await queryRunner.query(
+      `DROP TYPE IF EXISTS "oasis"."promotions_color_enum"`,
+    );
+    await queryRunner.query(
+      `DROP TYPE IF EXISTS "oasis"."appointments_status_enum"`,
+    );
+    await queryRunner.query(
+      `DROP TYPE IF EXISTS "oasis"."specialists_status_enum"`,
+    );
     await queryRunner.query(`DROP TYPE IF EXISTS "oasis"."users_level_enum"`);
     await queryRunner.query(`DROP TYPE IF EXISTS "oasis"."users_role_enum"`);
     await queryRunner.query(`DROP SCHEMA IF EXISTS "oasis"`);

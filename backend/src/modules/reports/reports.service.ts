@@ -79,7 +79,9 @@ export class ReportsService {
     const disponibles = equipo.filter((e) => e.status !== 'Descanso').length;
     const capacidad = disponibles * JORNADA_MIN;
     const occupancy =
-      capacidad === 0 ? 0 : Math.min(100, Math.round((minutosHoy / capacidad) * 100));
+      capacidad === 0
+        ? 0
+        : Math.min(100, Math.round((minutosHoy / capacidad) * 100));
 
     // El porcentaje del ranking es relativo al servicio más solicitado, para
     // que la barra más larga llene el ancho disponible.
@@ -92,7 +94,9 @@ export class ReportsService {
           ? 100
           : 0
         : Math.round(
-            ((mesActual.ingresos - mesAnterior.ingresos) / mesAnterior.ingresos) * 100,
+            ((mesActual.ingresos - mesAnterior.ingresos) /
+              mesAnterior.ingresos) *
+              100,
           );
 
     const totalMes = mesActual.citas + mesActual.canceladas;
