@@ -49,7 +49,7 @@ export enum LoyaltyLevel {
  * son parte del estado del programa de fidelidad y cambian sólo cuando una cita
  * pasa a completada.
  */
-@Entity('users')
+@Entity({ schema: 'oasis', name: 'users' })
 export class User {
   /** Igual a `auth.users.id`. Lo asigna Supabase Auth, no la base. */
   @PrimaryColumn({ type: 'uuid' })

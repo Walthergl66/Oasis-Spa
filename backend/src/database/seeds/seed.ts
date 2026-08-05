@@ -154,9 +154,11 @@ async function seed(): Promise<void> {
     // Se limpia en orden inverso a las dependencias para poder re-ejecutar.
     await manager.query(`
       TRUNCATE TABLE
-        "notifications", "reviews", "appointments", "promotion_services", "promotions",
-        "user_favorite_services", "specialist_categories", "specialists", "services",
-        "users", "categories"
+        "oasis"."notifications", "oasis"."reviews", "oasis"."appointments",
+        "oasis"."promotion_services", "oasis"."promotions",
+        "oasis"."user_favorite_services", "oasis"."specialist_categories",
+        "oasis"."specialists", "oasis"."services", "oasis"."users",
+        "oasis"."categories"
       RESTART IDENTITY CASCADE
     `);
 

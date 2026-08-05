@@ -25,7 +25,7 @@ export enum NotificationType {
  * canales por tipo; `icon` es sólo presentación y viaja con el registro para no
  * codificar el mapeo en el frontend.
  */
-@Entity('notifications')
+@Entity({ schema: 'oasis', name: 'notifications' })
 @Index(['userId', 'read'])
 export class Notification {
   @PrimaryGeneratedColumn('uuid')

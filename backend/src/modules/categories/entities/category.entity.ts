@@ -17,7 +17,7 @@ import { Service } from '../../services/entities/service.entity';
  * Tenerla como tabla evita categorías escritas de formas distintas y permite
  * renombrarlas sin recorrer todos los servicios.
  */
-@Entity('categories')
+@Entity({ schema: 'oasis', name: 'categories' })
 export class Category {
   @PrimaryGeneratedColumn('uuid')
   id: string;

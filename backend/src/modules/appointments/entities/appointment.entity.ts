@@ -41,7 +41,7 @@ export enum AppointmentStatus {
  * - Cancelar nunca borra la fila: cambia el estado y libera la franja. El
  *   historial de cancelaciones alimenta el indicador de la tesis.
  */
-@Entity('appointments')
+@Entity({ schema: 'oasis', name: 'appointments' })
 @Index(['specialistId', 'startsAt'])
 @Index(['clientId', 'startsAt'])
 export class Appointment {

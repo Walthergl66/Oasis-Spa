@@ -32,7 +32,7 @@ export enum SpecialistStatus {
  * `userId` es opcional a propósito: el spa puede registrar a una especialista
  * para agendarla antes de que tenga cuenta en el sistema.
  */
-@Entity('specialists')
+@Entity({ schema: 'oasis', name: 'specialists' })
 export class Specialist {
   @PrimaryGeneratedColumn('uuid')
   id: string;

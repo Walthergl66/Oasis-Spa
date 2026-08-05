@@ -81,7 +81,7 @@ export class AppointmentsStatsService {
         serie.fecha::text AS fecha,
         COALESCE(SUM(a.price), 0)::float AS total
       FROM serie
-      LEFT JOIN appointments a
+      LEFT JOIN "oasis"."appointments" a
         ON (a.starts_at AT TIME ZONE $1)::date = serie.fecha
        AND a.status <> 'cancelada'
       GROUP BY serie.fecha
@@ -141,7 +141,7 @@ export class AppointmentsStatsService {
         COUNT(*) FILTER (WHERE status <> 'cancelada')::int AS citas,
         COALESCE(SUM(price) FILTER (WHERE status <> 'cancelada'), 0)::float AS ingresos,
         COUNT(*) FILTER (WHERE status = 'cancelada')::int AS canceladas
-      FROM appointments
+      FROM "oasis"."appointments"
       WHERE date_trunc('month', starts_at AT TIME ZONE $1)
           = date_trunc('month', (now() AT TIME ZONE $1) + ($2 || ' month')::interval)
       `,

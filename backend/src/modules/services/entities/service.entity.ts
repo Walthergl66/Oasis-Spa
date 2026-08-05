@@ -24,7 +24,7 @@ import { Review } from '../../reviews/entities/review.entity';
  * publicar una reseña) para no agregar sobre `reviews` en cada listado del
  * catálogo, que es la consulta más frecuente de la aplicación.
  */
-@Entity('services')
+@Entity({ schema: 'oasis', name: 'services' })
 export class Service {
   @PrimaryGeneratedColumn('uuid')
   id: string;

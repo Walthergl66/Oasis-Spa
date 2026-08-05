@@ -19,7 +19,7 @@ import { User } from '../../users/entities/user.entity';
  * la misma cita, sin depender de que el código lo valide. La restricción CHECK
  * garantiza además que la valoración esté entre 1 y 5.
  */
-@Entity('reviews')
+@Entity({ schema: 'oasis', name: 'reviews' })
 @Check('"rating" >= 1 AND "rating" <= 5')
 export class Review {
   @PrimaryGeneratedColumn('uuid')

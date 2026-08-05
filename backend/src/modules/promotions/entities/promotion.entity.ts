@@ -29,7 +29,7 @@ export enum PromotionColor {
  * la clienta, las fechas son las que permiten filtrar promociones vigentes sin
  * intervención manual.
  */
-@Entity('promotions')
+@Entity({ schema: 'oasis', name: 'promotions' })
 export class Promotion {
   @PrimaryGeneratedColumn('uuid')
   id: string;
