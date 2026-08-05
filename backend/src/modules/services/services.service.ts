@@ -62,6 +62,24 @@ export class ServicesService {
     return service;
   }
 
+  /**
+   * Persiste el promedio de valoraciones del servicio.
+   *
+   * El módulo de reseñas calcula la agregación sobre su propia tabla y entrega
+   * aquí el resultado: `rating` y `reviewsCount` son datos denormalizados y se
+   * actualizan en un solo sitio.
+   */
+  async recomputeRating(
+    serviceId: string,
+    reviewsCount: number,
+    rating: number,
+  ): Promise<ServiceResponse> {
+    const service = await this.getEntity(serviceId);
+    service.reviewsCount = reviewsCount;
+    service.rating = Math.round(rating * 10) / 10;
+    return ServicesService.toResponse(await this.repository.save(service));
+  }
+
   async findAll(
     options: { includeInactive?: boolean; category?: string } = {},
   ): Promise<ServiceResponse[]> {
