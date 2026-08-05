@@ -15,7 +15,11 @@ import { ReviewsService } from './reviews.service';
  * valoraciones del servicio al publicar una reseña.
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([Review]), AppointmentsModule, ServicesModule],
+  imports: [
+    TypeOrmModule.forFeature([Review]),
+    AppointmentsModule,
+    ServicesModule,
+  ],
   controllers: [ReviewsController],
   providers: [ReviewsService],
   exports: [ReviewsService],

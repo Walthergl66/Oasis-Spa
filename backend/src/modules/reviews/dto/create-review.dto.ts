@@ -26,6 +26,8 @@ export class CreateReviewDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(1000, { message: 'El comentario no puede superar los 1000 caracteres.' })
+  @MaxLength(1000, {
+    message: 'El comentario no puede superar los 1000 caracteres.',
+  })
   text?: string;
 }

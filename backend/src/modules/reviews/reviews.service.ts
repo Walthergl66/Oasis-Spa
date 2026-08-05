@@ -81,14 +81,10 @@ export class ReviewsService {
     const cita = await this.appointments.getEntity(dto.appointmentId);
 
     if (cita.clientId !== actor.id) {
-      throw new ForbiddenException(
-        'Sólo puedes reseñar tus propias citas.',
-      );
+      throw new ForbiddenException('Sólo puedes reseñar tus propias citas.');
     }
     if (cita.status !== AppointmentStatus.COMPLETADA) {
-      throw new BadRequestException(
-        'Sólo puedes reseñar una cita completada.',
-      );
+      throw new BadRequestException('Sólo puedes reseñar una cita completada.');
     }
     if (cita.review) {
       throw new ConflictException('Esta cita ya tiene una reseña.');
@@ -147,7 +143,9 @@ export class ReviewsService {
   }
 
   private async getEntity(id: string): Promise<Review> {
-    const review = await this.consulta().where('review.id = :id', { id }).getOne();
+    const review = await this.consulta()
+      .where('review.id = :id', { id })
+      .getOne();
     if (!review) throw new NotFoundException('La reseña no existe.');
     return review;
   }
