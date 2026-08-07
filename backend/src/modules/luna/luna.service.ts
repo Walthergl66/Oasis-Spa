@@ -8,8 +8,8 @@ import {
   LunaChatResponse,
   LunaNlu,
   LunaOption,
-  LUNA_NLU,
   LunaNluResult,
+  LUNA_NLU,
 } from './luna.types';
 import {
   addDays,
@@ -23,6 +23,8 @@ import {
   toTime,
   weekdayShort,
 } from './luna.util';
+
+type Servicios = Awaited<ReturnType<ServicesService['findAll']>>;
 
 type Step = 'idle' | 'service' | 'date' | 'time' | 'confirm' | 'cancel';
 
@@ -81,7 +83,9 @@ export class LunaService {
         /^(cancelar|olvidalo|dejalo)$/i.test(message.trim())
       ) {
         this.reset(state);
-        return this.respuesta('Listo, descarté esa solicitud. ¿En qué más puedo ayudarte?');
+        return this.respuesta(
+          'Listo, descarté esa solicitud. ¿En qué más puedo ayudarte?',
+        );
       }
 
       const services = await this.services.findAll();
@@ -90,7 +94,7 @@ export class LunaService {
       const reply =
         state.step === 'idle'
           ? await this.startIntent(actor, state, services, parsed)
-          : await this.continueFlow(actor, state, services, parsed);
+          : await this.continueFlow(actor, state, services, parsed, message);
 
       if (key) this.sessions.set(key, state);
       this.podarSesiones();
@@ -108,9 +112,7 @@ export class LunaService {
   private async startIntent(
     actor: User | null,
     state: FlowState,
-    services: ReturnType<ServicesService['findAll']> extends Promise<infer T>
-      ? T
-      : never,
+    services: Servicios,
     parsed: LunaNluResult,
   ): Promise<LunaChatResponse> {
     switch (parsed.intent) {
@@ -159,7 +161,10 @@ export class LunaService {
 
       case 'mis-citas': {
         if (!actor) return this.needLogin(state);
-        const upcoming = await this.appointments.findForClient(actor.id, 'upcoming');
+        const upcoming = await this.appointments.findForClient(
+          actor.id,
+          'upcoming',
+        );
         if (upcoming.length === 0) {
           return this.respuesta(
             'No tienes citas próximas. ¿Quieres que agende una?',
@@ -174,14 +179,18 @@ export class LunaService {
             `• ${a.serviceName} — ${formatLongDate(a.start)} a las ${toTime(a.start)} con ${a.specialistName}`,
           )
           .join('\n');
-        return this.respuesta(`Tienes ${upcoming.length} cita(s) próxima(s):\n${list}`, {
-          fnTag: 'consultarMisCitas()',
-        });
+        return this.respuesta(
+          `Tienes ${upcoming.length} cita(s) próxima(s):\n${list}`,
+          { fnTag: 'consultarMisCitas()' },
+        );
       }
 
       case 'cancelar': {
         if (!actor) return this.needLogin(state);
-        const upcoming = await this.appointments.findForClient(actor.id, 'upcoming');
+        const upcoming = await this.appointments.findForClient(
+          actor.id,
+          'upcoming',
+        );
         if (upcoming.length === 0) {
           return this.respuesta('No encuentro citas activas para cancelar.', {
             fnTag: 'consultarMisCitas()',
@@ -246,7 +255,7 @@ export class LunaService {
   private async flujoReservar(
     actor: User | null,
     state: FlowState,
-    services: Awaited<ReturnType<ServicesService['findAll']>>,
+    services: Servicios,
     parsed: LunaNluResult,
   ): Promise<LunaChatResponse> {
     const service = services.find((s) => s.name === parsed.serviceName);
@@ -272,8 +281,9 @@ export class LunaService {
   private async continueFlow(
     actor: User | null,
     state: FlowState,
-    services: Awaited<ReturnType<ServicesService['findAll']>>,
+    services: Servicios,
     parsed: LunaNluResult,
+    message: string,
   ): Promise<LunaChatResponse> {
     switch (state.step) {
       case 'service': {
@@ -292,7 +302,9 @@ export class LunaService {
 
       case 'date': {
         const service = services.find((s) => s.id === state.serviceId);
-        if (!service) return this.askDate(undefined, 'Ese servicio ya no está disponible. ');
+        if (!service) {
+          return this.askDate(undefined, 'Ese servicio ya no está disponible. ');
+        }
         if (!parsed.date) return this.askDate(service, 'No entendí la fecha. ');
         return this.askTime(state, service, parsed.date);
       }
@@ -302,7 +314,9 @@ export class LunaService {
         if (!service) return this.respuesta('Ese servicio ya no está disponible.');
         const time = parsed.time;
         if (!time) {
-          return this.respuesta('Dime la hora en formato 24 h, por ejemplo 10:00 o 15:30.');
+          return this.respuesta(
+            'Dime la hora en formato 24 h, por ejemplo 10:00 o 15:30.',
+          );
         }
 
         const availability = await this.appointments.getAvailability(
@@ -332,7 +346,9 @@ export class LunaService {
           );
         }
 
-        const specialist = await this.specialists.getEntity(slot.specialistIds[0]);
+        const specialist = await this.specialists.getEntity(
+          slot.specialistIds[0],
+        );
         state.step = 'confirm';
         state.time = time;
         state.specialistId = specialist.id;
@@ -350,11 +366,13 @@ export class LunaService {
       }
 
       case 'confirm': {
-        if (isNo(messageOf(parsed))) {
+        if (isNo(message)) {
           this.reset(state);
-          return this.respuesta('Sin problema, no reservé nada. ¿Quieres ver otro horario?');
+          return this.respuesta(
+            'Sin problema, no reservé nada. ¿Quieres ver otro horario?',
+          );
         }
-        if (!isYes(messageOf(parsed))) {
+        if (!isYes(message)) {
           return this.respuesta('¿Confirmo la cita? Respóndeme sí o no, por favor.');
         }
         if (!actor) return this.needLogin(state);
@@ -390,10 +408,12 @@ export class LunaService {
           parsed.index !== undefined && candidates[parsed.index]
             ? candidates[parsed.index]
             : candidates.find((c) =>
-                normalize(messageOf(parsed)).includes(normalize(c.serviceName)),
+                normalize(message).includes(normalize(c.serviceName)),
               );
         if (!elegido) {
-          return this.respuesta('No identifiqué la cita. Dime el número de la lista, por favor.');
+          return this.respuesta(
+            'No identifiqué la cita. Dime el número de la lista, por favor.',
+          );
         }
 
         const cancelled = await this.appointments.cancel(
@@ -413,22 +433,21 @@ export class LunaService {
     }
   }
 
-  private async askDate(
-    service?: Awaited<ReturnType<ServicesService['findAll']>>[number],
+  private askDate(
+    service?: Servicios[number],
     prefix = '',
-  ): Promise<LunaChatResponse> {
-    if (!service) {
-      return this.respuesta('¿Qué día te queda bien?', { options: this.dateOptions() });
-    }
+  ): LunaChatResponse {
     return this.respuesta(
-      `${prefix}Perfecto, ${service.name} ($${service.price} · ${service.durationMin} min). ¿Qué día te queda bien?`,
+      service
+        ? `${prefix}Perfecto, ${service.name} ($${service.price} · ${service.durationMin} min). ¿Qué día te queda bien?`
+        : `${prefix}¿Qué día te queda bien?`,
       { options: this.dateOptions() },
     );
   }
 
   private async askTime(
     state: FlowState,
-    service: Awaited<ReturnType<ServicesService['findAll']>>[number],
+    service: Servicios[number],
     date: string,
   ): Promise<LunaChatResponse> {
     const availability = await this.appointments.getAvailability(service.id, date);
@@ -514,9 +533,4 @@ export class LunaService {
   private podarSesiones(): void {
     if (this.sessions.size > 2000) this.sessions.clear();
   }
-}
-
-/** Reconstruye el texto para los pasos que sólo miran sí/no (confirm). */
-function messageOf(parsed: LunaNluResult): string {
-  return parsed.intent === 'desconocido' ? '' : '';
 }

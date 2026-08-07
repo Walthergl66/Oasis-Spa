@@ -10,6 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { LunaModule } from './modules/luna/luna.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
 import { ReportsModule } from './modules/reports/reports.module';
@@ -52,6 +53,7 @@ import { UsersModule } from './modules/users/users.module';
     PromotionsModule,
     NotificationsModule,
     ReportsModule,
+    LunaModule,
   ],
   controllers: [AppController],
   providers: [
