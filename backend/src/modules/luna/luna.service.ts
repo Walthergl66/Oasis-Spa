@@ -4,13 +4,13 @@ import { PromotionsService } from '../promotions/promotions.service';
 import { ServicesService } from '../services/services.service';
 import { SpecialistsService } from '../specialists/specialists.service';
 import { User } from '../users/entities/user.entity';
-import {
+import type {
   LunaChatResponse,
   LunaNlu,
   LunaOption,
   LunaNluResult,
-  LUNA_NLU,
 } from './luna.types';
+import { LUNA_NLU } from './luna.types';
 import {
   addDays,
   formatLongDate,
@@ -143,8 +143,9 @@ export class LunaService {
           });
         }
         const list = promos
-          .map((p) =>
-            `${p.badge} ${p.title}${p.priceNow != null ? ` — $${p.priceNow}` : ''} (${p.validText})`,
+          .map(
+            (p) =>
+              `${p.badge} ${p.title}${p.priceNow != null ? ` — $${p.priceNow}` : ''} (${p.validText})`,
           )
           .join('\n');
         return this.respuesta(
@@ -175,8 +176,9 @@ export class LunaService {
           );
         }
         const list = upcoming
-          .map((a) =>
-            `• ${a.serviceName} — ${formatLongDate(a.start)} a las ${toTime(a.start)} con ${a.specialistName}`,
+          .map(
+            (a) =>
+              `• ${a.serviceName} — ${formatLongDate(a.start)} a las ${toTime(a.start)} con ${a.specialistName}`,
           )
           .join('\n');
         return this.respuesta(
@@ -291,7 +293,9 @@ export class LunaService {
         if (!service) {
           return this.respuesta(
             'No identifiqué ese servicio. Elige uno de la lista, por favor.',
-            { options: services.map((s) => ({ label: s.name, value: s.name })) },
+            {
+              options: services.map((s) => ({ label: s.name, value: s.name })),
+            },
           );
         }
         state.step = 'date';
@@ -303,7 +307,10 @@ export class LunaService {
       case 'date': {
         const service = services.find((s) => s.id === state.serviceId);
         if (!service) {
-          return this.askDate(undefined, 'Ese servicio ya no está disponible. ');
+          return this.askDate(
+            undefined,
+            'Ese servicio ya no está disponible. ',
+          );
         }
         if (!parsed.date) return this.askDate(service, 'No entendí la fecha. ');
         return this.askTime(state, service, parsed.date);
@@ -311,7 +318,8 @@ export class LunaService {
 
       case 'time': {
         const service = services.find((s) => s.id === state.serviceId);
-        if (!service) return this.respuesta('Ese servicio ya no está disponible.');
+        if (!service)
+          return this.respuesta('Ese servicio ya no está disponible.');
         const time = parsed.time;
         if (!time) {
           return this.respuesta(
@@ -326,7 +334,9 @@ export class LunaService {
         const slot = availability.slots.find((s) => s.time === time);
 
         if (!slot || !slot.available) {
-          const free = availability.slots.filter((s) => s.available).slice(0, 6);
+          const free = availability.slots
+            .filter((s) => s.available)
+            .slice(0, 6);
           if (free.length === 0) {
             state.step = 'date';
             return this.respuesta(
@@ -373,7 +383,9 @@ export class LunaService {
           );
         }
         if (!isYes(message)) {
-          return this.respuesta('¿Confirmo la cita? Respóndeme sí o no, por favor.');
+          return this.respuesta(
+            '¿Confirmo la cita? Respóndeme sí o no, por favor.',
+          );
         }
         if (!actor) return this.needLogin(state);
 
@@ -433,10 +445,7 @@ export class LunaService {
     }
   }
 
-  private askDate(
-    service?: Servicios[number],
-    prefix = '',
-  ): LunaChatResponse {
+  private askDate(service?: Servicios[number], prefix = ''): LunaChatResponse {
     return this.respuesta(
       service
         ? `${prefix}Perfecto, ${service.name} ($${service.price} · ${service.durationMin} min). ¿Qué día te queda bien?`
@@ -450,7 +459,10 @@ export class LunaService {
     service: Servicios[number],
     date: string,
   ): Promise<LunaChatResponse> {
-    const availability = await this.appointments.getAvailability(service.id, date);
+    const availability = await this.appointments.getAvailability(
+      service.id,
+      date,
+    );
     const free = availability.slots.filter((s) => s.available);
     state.step = 'time';
     state.date = date;
@@ -470,7 +482,9 @@ export class LunaService {
       `Para el ${formatLongDate(spaNoon(date))} tengo estos horarios disponibles. ¿Cuál prefieres?`,
       {
         fnTag: `consultarDisponibilidad("${service.name}", "${date}") → ${free.length} horarios`,
-        options: free.slice(0, 8).map((s) => ({ label: s.time, value: s.time })),
+        options: free
+          .slice(0, 8)
+          .map((s) => ({ label: s.time, value: s.time })),
       },
     );
   }

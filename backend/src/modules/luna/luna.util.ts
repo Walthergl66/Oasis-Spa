@@ -10,7 +10,10 @@ const SPA_OFFSET_MIN = -5 * 60; // Ecuador continental, sin horario de verano.
 
 /** Minúsculas y sin tildes, para comparar lo que escribe la clienta. */
 export const normalize = (text: string): string =>
-  text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 
 /** "Hoy" en el calendario del spa, como Date con componentes locales. */
 export function hoyEnSpa(): Date {

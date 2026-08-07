@@ -7,11 +7,12 @@
  * resultado de esa ejecución. Cada llamada queda marcada con `fnTag`, que la
  * burbuja del chat muestra como evidencia de la función ejecutada.
  *
- * Fase 3 del proyecto: `LunaSession.handle()` pasará a hacer POST /luna/chat y
- * será NestJS quien decida (vía tool use del modelo) qué función ejecutar. El
- * catálogo de herramientas de más abajo es exactamente el que se declarará allí.
+ * Fase 3 del proyecto: con `VITE_USE_MOCK=false`, `LunaSession.handle()` hace
+ * POST /luna/chat y es NestJS quien decide (vía la capa `LunaNlu`, hoy por
+ * reglas y sustituible por un LLM) qué función ejecutar. El catálogo de
+ * herramientas de más abajo es exactamente el que declara el backend.
  */
-import { errorMessage } from '../api/http';
+import { USE_MOCK, errorMessage, http } from '../api/http';
 import type { Appointment, Service, User } from '../types';
 import { addDays, formatLongDate, toISODate, toTime, weekdayShort } from '../utils/date';
 import { appointmentsService } from './appointments.service';
@@ -33,6 +34,15 @@ export interface LunaMessage {
   options?: LunaOption[];
   /** true cuando la respuesta cambió datos y las vistas deben refrescarse. */
   mutated?: boolean;
+}
+
+/** Respuesta de POST /luna/chat de NestJS. */
+export interface LunaChatResponse {
+  text: string;
+  fnTag?: string;
+  options?: LunaOption[];
+  mutated?: boolean;
+  sessionId?: string;
 }
 
 /** Catálogo de funciones que Luna puede ejecutar (futuras tools de NestJS). */
@@ -167,6 +177,8 @@ export class LunaSession {
   private user: User | null;
   private cachedServices: Service[] = [];
   private cancelCandidates: Appointment[] = [];
+  /** Identifica la conversación anónima ante el servidor (modo real). */
+  private readonly sessionId = `web-${Math.random().toString(36).slice(2, 10)}`;
 
   constructor(user: User | null) {
     this.user = user;
@@ -199,6 +211,7 @@ export class LunaSession {
 
   /** Procesa un mensaje de la clienta y devuelve las respuestas de Luna. */
   async handle(text: string): Promise<LunaMessage[]> {
+    if (!USE_MOCK) return this.handleApi(text);
     try {
       if (this.state.step !== 'idle' && /^(cancelar|olvidalo|dejalo)$/i.test(text.trim())) {
         this.reset();
@@ -208,6 +221,27 @@ export class LunaSession {
       return await this.startIntent(text);
     } catch (error) {
       this.reset();
+      return [lunaMessage('bot', `Ups, algo salió mal: ${errorMessage(error)}`)];
+    }
+  }
+
+  /**
+   * Modo real: NestJS decide el flujo (vía `LunaNlu`) y ejecuta las funciones.
+   * Aquí sólo se mapea la respuesta a una burbuja de chat.
+   */
+  private async handleApi(text: string): Promise<LunaMessage[]> {
+    try {
+      const response = await http.post<LunaChatResponse>('/luna/chat', {
+        message: text,
+        sessionId: this.sessionId,
+      });
+      const reply = response.data;
+      return [lunaMessage('bot', reply.text, {
+        fnTag: reply.fnTag,
+        options: reply.options,
+        mutated: reply.mutated,
+      })];
+    } catch (error) {
       return [lunaMessage('bot', `Ups, algo salió mal: ${errorMessage(error)}`)];
     }
   }

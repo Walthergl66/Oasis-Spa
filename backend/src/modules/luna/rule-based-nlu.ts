@@ -18,21 +18,39 @@ import { addDays, hoyEnSpa, normalize, toISODate } from './luna.util';
  */
 
 const MONTHS = [
-  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+  'enero',
+  'febrero',
+  'marzo',
+  'abril',
+  'mayo',
+  'junio',
+  'julio',
+  'agosto',
+  'septiembre',
+  'octubre',
+  'noviembre',
+  'diciembre',
 ];
 const WEEKDAYS = [
-  'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado',
+  'domingo',
+  'lunes',
+  'martes',
+  'miércoles',
+  'jueves',
+  'viernes',
+  'sábado',
 ];
 
 function detectIntent(text: string): LunaIntentType {
   const t = normalize(text);
   if (/(cancel|anul)/.test(t)) return 'cancelar';
-  if (/(mis citas|mis reservas|que tengo|tengo cita|proxima cita)/.test(t)) return 'mis-citas';
+  if (/(mis citas|mis reservas|que tengo|tengo cita|proxima cita)/.test(t))
+    return 'mis-citas';
   if (/(reserv|agend|cita|quiero un|separar)/.test(t)) return 'reservar';
   if (/(precio|cuesta|vale|tarifa|cuanto)/.test(t)) return 'precios';
   if (/(horario|abren|cierran|atienden)/.test(t)) return 'horarios';
-  if (/(especialista|quien me atiende|estilista)/.test(t)) return 'especialistas';
+  if (/(especialista|quien me atiende|estilista)/.test(t))
+    return 'especialistas';
   if (/(promo|descuento|oferta)/.test(t)) return 'promociones';
   if (/^(hola|buenas|buenos dias|hey|que tal)/.test(t)) return 'saludo';
   return 'desconocido';

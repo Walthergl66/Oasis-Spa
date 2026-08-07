@@ -34,11 +34,26 @@ export interface LunaTool {
 }
 
 export const LUNA_TOOLS: LunaTool[] = [
-  { name: 'listarServicios', description: 'Lista el catálogo de servicios con precio y duración.' },
-  { name: 'consultarDisponibilidad', description: 'Consulta los horarios libres de un servicio en una fecha.' },
-  { name: 'registrarCita', description: 'Registra una cita para la clienta autenticada.' },
-  { name: 'consultarMisCitas', description: 'Devuelve las próximas citas de la clienta.' },
-  { name: 'cancelarCita', description: 'Cancela una cita activa de la clienta.' },
+  {
+    name: 'listarServicios',
+    description: 'Lista el catálogo de servicios con precio y duración.',
+  },
+  {
+    name: 'consultarDisponibilidad',
+    description: 'Consulta los horarios libres de un servicio en una fecha.',
+  },
+  {
+    name: 'registrarCita',
+    description: 'Registra una cita para la clienta autenticada.',
+  },
+  {
+    name: 'consultarMisCitas',
+    description: 'Devuelve las próximas citas de la clienta.',
+  },
+  {
+    name: 'cancelarCita',
+    description: 'Cancela una cita activa de la clienta.',
+  },
   { name: 'listarPromociones', description: 'Lista las promociones vigentes.' },
 ] as const;
 

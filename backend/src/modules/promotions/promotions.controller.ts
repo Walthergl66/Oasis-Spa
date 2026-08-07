@@ -33,7 +33,10 @@ export class PromotionsController {
   @Public()
   @Get()
   @ApiQuery({ name: 'includeInactive', required: false })
-  findAll(@Query('includeInactive', new ParseBoolPipe({ optional: true })) includeInactive = false) {
+  findAll(
+    @Query('includeInactive', new ParseBoolPipe({ optional: true }))
+    includeInactive = false,
+  ) {
     return this.promotionsService.findAll(includeInactive);
   }
 
@@ -55,7 +58,10 @@ export class PromotionsController {
   @Patch(':id')
   @ApiBearerAuth('bearer')
   @Roles(UserRole.ADMIN)
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdatePromotionDto) {
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdatePromotionDto,
+  ) {
     return this.promotionsService.update(id, dto);
   }
 

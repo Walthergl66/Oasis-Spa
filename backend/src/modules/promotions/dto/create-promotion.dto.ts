@@ -44,8 +44,13 @@ export class CreatePromotionDto {
   validText?: string;
 
   @IsArray()
-  @IsUUID('4', { each: true, message: 'Los servicios indicados no son válidos.' })
-  @ArrayMinSize(1, { message: 'La promoción debe cubrir al menos un servicio.' })
+  @IsUUID('4', {
+    each: true,
+    message: 'Los servicios indicados no son válidos.',
+  })
+  @ArrayMinSize(1, {
+    message: 'La promoción debe cubrir al menos un servicio.',
+  })
   serviceIds: string[];
 
   @IsOptional()

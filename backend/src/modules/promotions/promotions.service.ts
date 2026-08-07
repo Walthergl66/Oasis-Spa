@@ -67,9 +67,12 @@ export class PromotionsService {
       const ahora = new Date().toISOString();
       query
         .andWhere('promotion.active = true')
-        .andWhere('(promotion.startsAt IS NULL OR promotion.startsAt <= :ahora)', {
-          ahora,
-        })
+        .andWhere(
+          '(promotion.startsAt IS NULL OR promotion.startsAt <= :ahora)',
+          {
+            ahora,
+          },
+        )
         .andWhere('(promotion.endsAt IS NULL OR promotion.endsAt >= :ahora)', {
           ahora,
         });
@@ -117,8 +120,7 @@ export class PromotionsService {
       promotion.description = dto.description.trim();
     if (dto.badge !== undefined) promotion.badge = dto.badge.trim();
     if (dto.color !== undefined) promotion.color = dto.color;
-    if (dto.validText !== undefined)
-      promotion.validText = dto.validText.trim();
+    if (dto.validText !== undefined) promotion.validText = dto.validText.trim();
     if (dto.priceBefore !== undefined) promotion.priceBefore = dto.priceBefore;
     if (dto.priceNow !== undefined) promotion.priceNow = dto.priceNow;
     if (dto.image !== undefined) promotion.imageUrl = dto.image.trim();
