@@ -80,3 +80,6 @@ export interface ServiceLike {
 export interface LunaNlu {
   parse(message: string, context: { services: ServiceLike[] }): LunaNluResult;
 }
+
+/** Token de inyección de la capa de comprensión (apunta a `RuleBasedNlu` hoy). */
+export const LUNA_NLU = Symbol('LunaNlu');

@@ -5,6 +5,7 @@ import {
   LunaNluResult,
   ServiceLike,
 } from './luna.types';
+import { addDays, hoyEnSpa, normalize, toISODate } from './luna.util';
 
 /**
  * Comprensión de mensajes por reglas.
@@ -23,32 +24,6 @@ const MONTHS = [
 const WEEKDAYS = [
   'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado',
 ];
-
-const SPA_OFFSET_MIN = -5 * 60; // America/Guayaquil, sin horario de verano.
-
-/** Minúsculas y sin tildes, para comparar lo que escribe la clienta. */
-const normalize = (text: string): string =>
-  text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
-/** "Hoy" en el calendario del spa, como Date con componentes locales. */
-function hoyEnSpa(): Date {
-  const now = new Date();
-  const utc = now.getTime() + now.getTimezoneOffset() * 60_000;
-  return new Date(utc + SPA_OFFSET_MIN * 60_000);
-}
-
-function toISODate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-function addDays(date: Date, days: number): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
-}
 
 function detectIntent(text: string): LunaIntentType {
   const t = normalize(text);
@@ -150,20 +125,13 @@ function parseTime(text: string): string | null {
 export class RuleBasedNlu implements LunaNlu {
   parse(message: string, context: { services: ServiceLike[] }): LunaNluResult {
     const text = message.trim();
-    const result: LunaNluResult = { intent: detectIntent(text) };
-
-    if (result.intent === 'reservar' || result.intent === 'precios') {
-      result.serviceName = matchServiceName(context.services, text);
-    }
-    if (result.intent === 'reservar') {
-      result.date = parseDate(text) ?? undefined;
-      result.time = parseTime(text) ?? undefined;
-    }
-    if (result.intent === 'cancelar') {
-      const numero = text.trim().match(/^\d{1,2}$/);
-      if (numero) result.index = Number(numero[0]) - 1;
-      result.serviceName = matchServiceName(context.services, text);
-    }
-    return result;
+    const numero = text.match(/^\d{1,2}$/);
+    return {
+      intent: detectIntent(text),
+      serviceName: matchServiceName(context.services, text),
+      date: parseDate(text) ?? undefined,
+      time: parseTime(text) ?? undefined,
+      index: numero ? Number(numero[0]) - 1 : undefined,
+    };
   }
 }
