@@ -1,4 +1,0 @@
-/* Hoja principal: orden importa (tokens -> componentes -> utilidades). */
-@import './styles/base.css';
-@import './styles/components.css';
-@import './styles/utilities.css';
