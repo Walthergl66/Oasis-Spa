@@ -8,6 +8,8 @@ import { validate } from './config/env.validation.js';
 import { typeOrmConfigAsync } from './config/database.config.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
+import { UsersModule } from './modules/users/users.module.js';
+import { AuthModule } from './modules/auth/auth.module.js';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { AppService } from './app.service.js';
         limit: 100,
       },
     ]),
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
