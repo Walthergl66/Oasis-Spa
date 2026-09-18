@@ -10,6 +10,8 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { ServicesModule } from './modules/services/services.module.js';
+import { EmployeesModule } from './modules/employees/employees.module.js';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { AuthModule } from './modules/auth/auth.module.js';
     ]),
     UsersModule,
     AuthModule,
+    ServicesModule,
+    EmployeesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
