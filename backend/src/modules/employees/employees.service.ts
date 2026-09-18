@@ -84,7 +84,7 @@ export class EmployeesService {
   async findById(id: string): Promise<EmployeeProfile> {
     const employee = await this.employeeRepository.findOne({
       where: { id },
-      relations: ['user', 'services', 'schedules'],
+      relations: { user: true, services: true, schedules: true },
     });
     if (!employee) {
       throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
@@ -95,7 +95,7 @@ export class EmployeesService {
   async findByUserId(userId: string): Promise<EmployeeProfile> {
     const employee = await this.employeeRepository.findOne({
       where: { userId },
-      relations: ['user', 'services', 'schedules'],
+      relations: { user: true, services: true, schedules: true },
     });
     if (!employee) {
       throw new NotFoundException(`Perfil de empleado para el usuario ${userId} no encontrado`);
