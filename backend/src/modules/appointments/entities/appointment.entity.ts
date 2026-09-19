@@ -16,6 +16,7 @@ import { AppointmentStatus } from '../enums/appointment-status.enum.js';
 @Entity('appointments')
 @Index(['employeeId', 'startTime', 'endTime'])
 @Index(['clientId', 'status'])
+@Index(['status', 'startTime'])
 export class Appointment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
