@@ -34,7 +34,7 @@ export class AssistantController {
     @CurrentUser() user: RequestUser,
     @Body() dto: SendMessageDto,
   ): Promise<ChatReplyDto> {
-    return this.conversationsService.chat(user.id, dto.conversationId, dto.message);
+    return this.conversationsService.chat(user.id, user.role, dto.conversationId, dto.message);
   }
 
   @Get('conversations')
