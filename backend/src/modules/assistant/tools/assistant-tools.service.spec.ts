@@ -63,7 +63,13 @@ describe('AssistantToolsService (Sprint 6: tools + dos pasos)', () => {
   it('registrarCita propone primero y crea solo tras confirmar', async () => {
     mockServices.findById.mockResolvedValue(SERVICE);
     mockAvailability.getAvailableSlots.mockResolvedValue({
-      availableSlots: [{ startTime: SLOT_ISO, employeeId: 'emp-1', employeeName: 'Ana' }],
+      availableSlots: [
+        {
+          startTime: SLOT_ISO,
+          employeeId: '22222222-2222-4222-8222-222222222222',
+          employeeName: 'Ana',
+        },
+      ],
     });
     mockAppointments.createAppointment.mockResolvedValue({
       id: 'appt-1',
