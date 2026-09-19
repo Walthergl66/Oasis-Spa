@@ -78,6 +78,13 @@ export class AssistantToolsService {
       handler: (args) => this.listarServicios(args),
     });
     this.register({
+      name: 'misCitas',
+      description:
+        'Lista las citas activas (pendientes y confirmadas) del usuario autenticado. Úsala cuando pregunte por sus citas o para identificar cuál cancelar/reprogramar.',
+      parameters: {},
+      handler: (_args, ctx) => this.misCitas(ctx),
+    });
+    this.register({
       name: 'consultarDisponibilidad',
       description:
         'Consulta espacios libres reales para un servicio en una fecha. NUNCA inventes horarios: usa siempre esta herramienta.',
@@ -199,6 +206,27 @@ export class AssistantToolsService {
         durationMinutes: s.durationMinutes,
         category: s.category,
       })),
+    };
+  }
+
+  private async misCitas(ctx: ToolContext): Promise<ToolResult> {
+    const mine = await this.appointmentsService.findByClient(ctx.userId);
+    const active = mine.filter(
+      (a) => a.status === AppointmentStatus.PENDING || a.status === AppointmentStatus.CONFIRMED,
+    );
+    if (active.length === 0) {
+      return { ok: true, summary: 'No tienes citas activas por ahora. ¿Te ayudo a reservar una?', data: [] };
+    }
+    const lines = active
+      .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+      .map(
+        (a) =>
+          `- ${a.service?.name ?? 'Servicio'} el ${new Date(a.startTime).toISOString().slice(0, 16).replace('T', ' ')} UTC (${a.status})`,
+      );
+    return {
+      ok: true,
+      summary: `Tus citas activas:\n${lines.join('\n')}`,
+      data: active.map((a) => ({ id: a.id, startTime: a.startTime, status: a.status })),
     };
   }
 
