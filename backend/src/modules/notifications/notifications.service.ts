@@ -196,6 +196,12 @@ export class NotificationsService implements OnModuleInit {
       },
     });
     const due = upcoming.filter((a) => {
+      if (
+        a.status !== AppointmentStatus.PENDING &&
+        a.status !== AppointmentStatus.CONFIRMED
+      ) {
+        return false;
+      }
       const start = new Date(a.startTime).getTime();
       return start > now.getTime() && start <= limit.getTime();
     });
