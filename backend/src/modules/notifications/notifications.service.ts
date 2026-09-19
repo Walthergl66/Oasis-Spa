@@ -17,7 +17,7 @@ export interface PushPayload {
   tag?: string;
 }
 
-interface SentRecord extends PushPayload {
+export interface SentRecord extends PushPayload {
   userId: string;
   sentAt: string;
   channel: 'push' | 'log';
