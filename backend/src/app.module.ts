@@ -15,6 +15,7 @@ import { EmployeesModule } from './modules/employees/employees.module.js';
 import { AvailabilityModule } from './modules/availability/availability.module.js';
 import { AppointmentsModule } from './modules/appointments/appointments.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
+import { AssistantModule } from './modules/assistant/assistant.module.js';
 import { AppointmentExclusionService } from './database/exclusions/appointment-exclusion.service.js';
 
 @Module({
@@ -40,6 +41,7 @@ import { AppointmentExclusionService } from './database/exclusions/appointment-e
     AvailabilityModule,
     AppointmentsModule,
     NotificationsModule,
+    AssistantModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppointmentExclusionService],
