@@ -70,33 +70,38 @@ function toYmd(y: number, m: number, d: number): string {
 }
 
 /**
- * Extrae fecha calendario YYYY-MM-DD del mensaje (hoy, mañana,
- * pasado mañana, ISO, DD/MM[/YYYY] o próximo día de semana).
+ * Extrae TODAS las fechas calendario del mensaje, en orden de aparición.
+ * Base de extractDate; permite distinguir fecha actual vs. nueva
+ * en reprogramaciones ("mueve mi cita de mañana al viernes").
  */
-export function extractDate(text: string, now: Date = new Date()): string | null {
-  const t = normalize(text);
+export function extractAllDates(text: string, now: Date = new Date()): string[] {
+  const t = ` ${normalize(text)} `;
   const { y, m, d } = ecuadorParts(now);
-  const todayMs = Date.UTC(y, m, d);
+  const found: Array<{ index: number; value: string }> = [];
 
-  if (/\bpasado manana\b/.test(t)) {
-    return toYmd(y, m, d + 2);
-  }
-  if (/\bmanana\b/.test(t)) {
-    return toYmd(y, m, d + 1);
-  }
-  if (/\bhoy\b/.test(t)) {
-    return toYmd(y, m, d);
+  const push = (re: RegExp, value: string) => {
+    const match = re.exec(t);
+    if (match && match.index !== undefined) found.push({ index: match.index, value });
+  };
+
+  push(/\bpasado manana\b/, toYmd(y, m, d + 2));
+  push(/(?<!pasado )manana\b/, toYmd(y, m, d + 1));
+  push(/\bhoy\b/, toYmd(y, m, d));
+
+  const isoRe = /\b(20\d{2})-(\d{2})-(\d{2})\b/g;
+  let isoMatch: RegExpExecArray | null;
+  while ((isoMatch = isoRe.exec(t)) !== null) {
+    found.push({ index: isoMatch.index, value: `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}` });
   }
 
-  const iso = t.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);
-  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
-
-  const latin = t.match(/\b(\d{1,2})\/(\d{1,2})(?:\/(20\d{2}))?\b/);
-  if (latin) {
-    const dd = Number(latin[1]);
-    const mm = Number(latin[2]);
-    const yyyy = latin[3] ? Number(latin[3]) : y;
-    return toYmd(yyyy, mm - 1, dd);
+  const latinRe = /\b(\d{1,2})\/(\d{1,2})(?:\/(20\d{2}))?\b/g;
+  let latinMatch: RegExpExecArray | null;
+  while ((latinMatch = latinRe.exec(t)) !== null) {
+    const yyyy = latinMatch[3] ? Number(latinMatch[3]) : y;
+    found.push({
+      index: latinMatch.index,
+      value: toYmd(yyyy, Number(latinMatch[2]) - 1, Number(latinMatch[1])),
+    });
   }
 
   const weekdays: Array<[RegExp, number]> = [
@@ -108,15 +113,25 @@ export function extractDate(text: string, now: Date = new Date()): string | null
     [/\bviernes\b/, 5],
     [/\bsabado\b/, 6],
   ];
-  const todayDow = new Date(todayMs).getUTCDay();
+  const todayDow = new Date(Date.UTC(y, m, d)).getUTCDay();
   for (const [re, dow] of weekdays) {
-    if (re.test(t)) {
+    const match = re.exec(t);
+    if (match && match.index !== undefined) {
       let delta = (dow - todayDow + 7) % 7;
       if (delta === 0) delta = 7;
-      return toYmd(y, m, d + delta);
+      found.push({ index: match.index, value: toYmd(y, m, d + delta) });
     }
   }
-  return null;
+
+  return found.sort((a, b) => a.index - b.index).map((f) => f.value);
+}
+
+/**
+ * Extrae fecha calendario YYYY-MM-DD del mensaje (hoy, mañana,
+ * pasado mañana, ISO, DD/MM[/YYYY] o próximo día de semana).
+ */
+export function extractDate(text: string, now: Date = new Date()): string | null {
+  return extractAllDates(text, now)[0] ?? null;
 }
 
 /** Extrae hora HH:mm (24h) o null si es ambigua/ausente. */
