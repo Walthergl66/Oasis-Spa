@@ -5,8 +5,6 @@ export const typeOrmConfigAsync: TypeOrmModuleAsyncOptions = {
   imports: [ConfigModule],
   inject: [ConfigService],
   useFactory: (configService: ConfigService): TypeOrmModuleOptions => {
-    const isTest = configService.get<string>('NODE_ENV') === 'test';
-
     return {
       type: 'postgres',
       host: configService.get<string>('DB_HOST', 'localhost'),

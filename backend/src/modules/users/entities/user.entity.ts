@@ -4,8 +4,6 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  OneToMany,
-  OneToOne,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { Role } from '../../../common/enums/role.enum.js';
