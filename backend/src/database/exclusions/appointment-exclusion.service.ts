@@ -43,8 +43,9 @@ export class AppointmentExclusionService implements OnApplicationBootstrap {
       await this.dataSource.query(query);
       this.logger.log('✅ Restricción GiST (no_overlapping_appointments) activa en PostgreSQL.');
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       this.logger.warn(
-        `Nota sobre restricción GiST en appointments (podría aplicarse una vez existan las tablas): ${error.message}`,
+        `Nota sobre restricción GiST en appointments (podría aplicarse una vez existan las tablas): ${message}`,
       );
     }
   }
