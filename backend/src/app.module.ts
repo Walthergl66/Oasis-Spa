@@ -12,6 +12,9 @@ import { UsersModule } from './modules/users/users.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { ServicesModule } from './modules/services/services.module.js';
 import { EmployeesModule } from './modules/employees/employees.module.js';
+import { AvailabilityModule } from './modules/availability/availability.module.js';
+import { AppointmentsModule } from './modules/appointments/appointments.module.js';
+import { AppointmentExclusionService } from './database/exclusions/appointment-exclusion.service.js';
 
 @Module({
   imports: [
@@ -33,8 +36,10 @@ import { EmployeesModule } from './modules/employees/employees.module.js';
     AuthModule,
     ServicesModule,
     EmployeesModule,
+    AvailabilityModule,
+    AppointmentsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppointmentExclusionService],
 })
 export class AppModule {}
