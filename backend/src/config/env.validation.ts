@@ -92,7 +92,11 @@ export class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
-  ADMIN_EMAIL?: string;
+  GEMINI_API_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  LLM_MODEL?: string;
 }
 
 export function validate(config: Record<string, unknown>) {
