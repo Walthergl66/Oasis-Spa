@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { validate } from './config/env.validation.js';
 import { typeOrmConfigAsync } from './config/database.config.js';
 import { AppController } from './app.controller.js';
@@ -48,6 +49,10 @@ import { AppointmentExclusionService } from './database/exclusions/appointment-e
     PaymentsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AppointmentExclusionService],
+  providers: [
+    AppService,
+    AppointmentExclusionService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
 })
 export class AppModule {}
